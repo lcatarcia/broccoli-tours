@@ -1,0 +1,211 @@
+.itinerary-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: linear-gradient(135deg, #1a1510 0%, #2a2015 50%, #1a1510 100%);
+    min-height: 100vh;
+    color: #e8d7c3;
+}
+
+.itinerary-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.itinerary-header h1 {
+    color: #f4a460;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.itinerary-logo {
+    max-width: 300px;
+    height: auto;
+    margin: 1rem auto;
+    display: block;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.summary {
+    font-size: 1.1rem;
+    color: #c9a87c;
+    margin-bottom: 1.5rem;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.btn-back,
+.btn-pdf {
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-back {
+    background: linear-gradient(145deg, #3a3530, #2a2520);
+    color: #e8d7c3;
+    border: 1px solid #4a4035;
+}
+
+.btn-back:hover {
+    background: linear-gradient(145deg, #4a4540, #3a3530);
+    box-shadow: 0 4px 12px rgba(139, 111, 71, 0.3);
+}
+
+.btn-pdf {
+    background: linear-gradient(145deg, #8b6f47, #6d5838);
+    color: #fff;
+    border: 1px solid #4a4035;
+}
+
+.btn-pdf:hover {
+    background: linear-gradient(145deg, #9b7f57, #7d6848);
+    box-shadow: 0 4px 12px rgba(139, 111, 71, 0.4);
+}
+
+.itinerary-content {
+    display: grid;
+    gap: 2rem;
+}
+
+.days-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.day-card {
+    background: linear-gradient(145deg, #2a2520, #3a3530);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    border: 1px solid #4a4035;
+}
+
+.day-card h3 {
+    color: #f4a460;
+    margin-top: 0;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.date {
+    color: #c9a87c;
+    font-size: 0.95rem;
+}
+
+.drive-hours {
+    color: #f4a460;
+    font-weight: 600;
+    margin: 0.5rem 0;
+}
+
+.stops {
+    margin: 1rem 0;
+}
+
+.stop {
+    padding: 1rem;
+    background: rgba(58, 53, 48, 0.5);
+    border-left: 3px solid #8b6f47;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+.stop h4 {
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stop-type {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: #8b6f47;
+    color: white;
+    border-radius: 3px;
+    font-size: 0.8rem;
+}
+
+.activities {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(139, 111, 71, 0.2);
+    border-radius: 4px;
+    border: 1px solid rgba(139, 111, 71, 0.3);
+}
+
+.activities ul {
+    margin: 0.5rem 0 0 0;
+    padding-left: 1.5rem;
+}
+
+.overnight {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(244, 164, 96, 0.15);
+    border-radius: 4px;
+    border-left: 3px solid #f4a460;
+}
+
+.map-section {
+    background: linear-gradient(145deg, #2a2520, #3a3530);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    border: 1px solid #4a4035;
+}
+
+.map-section h3 {
+    margin-top: 0;
+    color: #f4a460;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.tips-section {
+    background: linear-gradient(145deg, #2a2520, #3a3530);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    border: 1px solid #4a4035;
+}
+
+.tips-section h3 {
+    color: #f4a460;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.tips-section ul {
+    color: #e8d7c3;
+}
+
+.tips-section h3 {
+    margin-top: 0;
+    color: #2c7a4b;
+}
+
+.tips-section ul {
+    padding-left: 1.5rem;
+}
+
+.itinerary-error {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.itinerary-error button {
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: #2c7a4b;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+}

@@ -1,0 +1,29 @@
+import type { Camper, Location, Itinerary, TravelPreferences } from './types';
+
+const API_BASE = 'http://localhost:5080/api';
+
+export async function getCampers(): Promise<Camper[]> {
+    const response = await fetch(`${API_BASE}/campers`);
+    if (!response.ok) throw new Error('Failed to fetch campers');
+    return response.json();
+}
+
+export async function getLocations(): Promise<Location[]> {
+    const response = await fetch(`${API_BASE}/locations`);
+    if (!response.ok) throw new Error('Failed to fetch locations');
+    return response.json();
+}
+
+export async function suggestItinerary(preferences: TravelPreferences): Promise<Itinerary> {
+    const response = await fetch(`${API_BASE}/itineraries/suggest`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(preferences),
+    });
+    if (!response.ok) throw new Error('Failed to suggest itinerary');
+    return response.json();
+}
+
+export function getPdfUrl(itineraryId: string, mode: 'detailed' | 'brochure' = 'detailed'): string {
+    return `${API_BASE}/itineraries/${itineraryId}/pdf?mode=${mode}`;
+}

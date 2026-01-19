@@ -1,0 +1,18 @@
+{
+  "dotnet.defaultSolution": "backend/BroccoliTours.sln",
+  "files.exclude": {
+    "**/bin": true,
+    "**/obj": true,
+    "**/node_modules": true,
+    "**/dist": true
+  },
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    },
+    "./frontend"
+  ],
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.tsdk": "frontend/node_modules/typescript/lib",
+  "FSharp.suggestGitignore": false
+}

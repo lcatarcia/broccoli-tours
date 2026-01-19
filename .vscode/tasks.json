@@ -1,0 +1,273 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "backend: restore",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"restore",
+				"BroccoliTours.sln"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/backend"
+			},
+			"problemMatcher": "$msCompile"
+		},
+		{
+			"label": "backend: build",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"BroccoliTours.sln",
+				"-c",
+				"Debug"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/backend"
+			},
+			"dependsOn": [
+				"backend: restore"
+			],
+			"problemMatcher": "$msCompile",
+			"group": "build"
+		},
+		{
+			"label": "backend: test",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				"BroccoliTours.sln",
+				"-c",
+				"Debug"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/backend"
+			},
+			"dependsOn": [
+				"backend: build"
+			],
+			"problemMatcher": "$msCompile",
+			"group": "test"
+		},
+		{
+			"label": "backend: watch",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"watch",
+				"--project",
+				"src/BroccoliTours.Api/BroccoliTours.Api.csproj",
+				"run"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/backend",
+				"env": {
+					"ASPNETCORE_ENVIRONMENT": "Development"
+				}
+			},
+			"isBackground": true,
+			"problemMatcher": [
+				{
+					"owner": "custom-dotnet-watch",
+					"pattern": [
+						{
+							"regexp": ".*"
+						}
+					],
+					"background": {
+						"activeOnStart": true,
+						"beginsPattern": ".*(dotnet\\s+watch|watch\\s*:).*",
+						"endsPattern": ".*(Now listening on:\\s+https?://\\S+|Application started\\.).*"
+					}
+				}
+			],
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"clear": false
+			}
+		},
+		{
+			"label": "frontend: install",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"install"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/frontend"
+			}
+		},
+		{
+			"label": "frontend: dev",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"dev"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/frontend"
+			},
+			"dependsOn": [
+				"frontend: install"
+			],
+			"isBackground": true,
+			"problemMatcher": [
+				{
+					"owner": "custom-vite-dev",
+					"pattern": [
+						{
+							"regexp": ".*"
+						}
+					],
+					"background": {
+						"activeOnStart": true,
+						"beginsPattern": ".*(vite|VITE).*",
+						"endsPattern": ".*(Local:\\s+https?://\\S+|ready in\\s+\\d+).*"
+					}
+				}
+			],
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"clear": false
+			}
+		},
+		{
+			"label": "dev: full stack",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Write-Host 'Starting full stack (backend + frontend)...'"
+			],
+			"dependsOn": [
+				"backend: watch",
+				"frontend: dev"
+			],
+			"dependsOrder": "parallel",
+			"problemMatcher": []
+		},
+		{
+			"label": "ops: free port 5173",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$conns = Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue; if (-not $conns) { Write-Host 'No listener found on port 5173.'; exit 0 }; $pids = $conns | Select-Object -ExpandProperty OwningProcess | Sort-Object -Unique; foreach ($pid in $pids) { $p = Get-Process -Id $pid -ErrorAction SilentlyContinue; if ($p) { Write-Host \"5173 -> PID $pid : $($p.ProcessName)\" } }; Stop-Process -Id $pids -Force; Start-Sleep -Seconds 1; if (Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue) { Write-Host 'Port 5173 is still in use.' } else { Write-Host 'Port 5173 freed.' }"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "ops: who uses port 5173",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue | Select-Object LocalAddress,LocalPort,OwningProcess | Format-Table -AutoSize | Out-String -Width 200; $pids = (Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique); if ($pids) { foreach ($pid in $pids) { $p=Get-Process -Id $pid -ErrorAction SilentlyContinue; if ($p) { Write-Host \"PID $pid -> $($p.ProcessName)\" } } } else { Write-Host 'No listener found.' }"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "ops: who uses port 5173 (fixed)",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$rows = Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue | Select-Object LocalAddress,LocalPort,OwningProcess; if ($rows) { $rows | Format-Table -AutoSize | Out-String -Width 200 | Write-Host } else { Write-Host 'No listener found on port 5173.'; exit 0 }; $processIds = $rows | Select-Object -ExpandProperty OwningProcess -Unique; foreach ($processId in $processIds) { $p = Get-Process -Id $processId -ErrorAction SilentlyContinue; if ($p) { Write-Host \"OwningProcess $processId -> $($p.ProcessName)\" } else { Write-Host \"OwningProcess $processId -> <exited>\" } }"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "ops: who uses port 5173 (shell)",
+			"type": "shell",
+			"command": "$rows = Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue | Select-Object LocalAddress,LocalPort,OwningProcess; if ($rows) { $rows | Format-Table -AutoSize | Out-String -Width 200 | Write-Host } else { Write-Host 'No listener found on port 5173.'; exit 0 }; $processIds = $rows | Select-Object -ExpandProperty OwningProcess -Unique; foreach ($processId in $processIds) { $p = Get-Process -Id $processId -ErrorAction SilentlyContinue; if ($p) { Write-Host \"OwningProcess $processId -> $($p.ProcessName)\" } else { Write-Host \"OwningProcess $processId -> <exited>\" } }",
+			"isBackground": false
+		},
+		{
+			"label": "ops: stop backend+frontend",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$ports = 5173,5174,5080,5081; $targets = @(); foreach ($port in $ports) { $conns = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue; foreach ($c in ($conns | Select-Object -Unique OwningProcess)) { if ($null -ne $c.OwningProcess) { $p = Get-Process -Id $c.OwningProcess -ErrorAction SilentlyContinue; if ($p -and ($p.ProcessName -in @('node','dotnet'))) { $targets += [pscustomobject]@{ Port=$port; Id=$p.Id; Name=$p.ProcessName } } } } }; if (-not $targets) { Write-Host 'No node/dotnet listeners found on ports 5173/5174/5080/5081.'; exit 0 }; $targets = $targets | Sort-Object Id -Unique; $targets | Format-Table -AutoSize | Out-String -Width 200 | Write-Host; foreach ($t in $targets) { Write-Host \"Stopping PID $($t.Id) ($($t.Name))\"; Stop-Process -Id $t.Id -Force -ErrorAction SilentlyContinue }; Start-Sleep -Seconds 1; foreach ($port in $ports) { $still = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue; if ($still) { Write-Host \"Port $port still has a listener.\" } else { Write-Host \"Port $port is free.\" } }"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "ops: check ports",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$ports=5173,5174,5080,5081; foreach ($p in $ports) { $c = Get-NetTCPConnection -LocalPort $p -State Listen -ErrorAction SilentlyContinue; if ($c) { Write-Host \"Port $p LISTEN\" } else { Write-Host \"Port $p free\" } }"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "ops: stop backend port 5080",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$port=5080; $rows=Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue; if (-not $rows) { Write-Host \"No listener on port $port\"; exit 0 }; $processIds=$rows | Select-Object -ExpandProperty OwningProcess -Unique; foreach ($processId in $processIds) { $p=Get-Process -Id $processId -ErrorAction SilentlyContinue; if ($p -and $p.ProcessName -eq 'dotnet') { Write-Host \"Stopping dotnet PID $processId for port $port\"; Stop-Process -Id $processId -Force } else { Write-Host \"Port $port owned by PID $processId ($($p.ProcessName)); not stopping.\" } }; Start-Sleep -Seconds 1; if (Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue) { Write-Host \"Port $port still LISTEN\"; exit 1 } else { Write-Host \"Port $port freed\" }"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "ops: check ports 2",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$ports=5173,5174,5080,5081; foreach ($p in $ports) { $c = Get-NetTCPConnection -LocalPort $p -State Listen -ErrorAction SilentlyContinue; if ($c) { Write-Host \"Port $p LISTEN\" } else { Write-Host \"Port $p free\" } }"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "ops: identify port 5080 owner",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$port=5080; $rows=Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique; if (-not $rows) { Write-Host 'No listener.'; exit 0 }; foreach ($processId in $rows) { $p=Get-Process -Id $processId -ErrorAction SilentlyContinue; $wmi=Get-CimInstance Win32_Process -Filter \"ProcessId=$processId\" -ErrorAction SilentlyContinue; Write-Host \"Port $port -> PID $processId\"; if ($p) { Write-Host \"Name: $($p.ProcessName)\" }; if ($wmi) { Write-Host \"CommandLine: $($wmi.CommandLine)\" } }"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "ops: stop backend watch+api",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$ErrorActionPreference='SilentlyContinue';\n# stop API exe on port 5080\n$apiPid = (Get-NetTCPConnection -LocalPort 5080 -State Listen | Select-Object -ExpandProperty OwningProcess -Unique)\nif ($apiPid) { foreach ($id in $apiPid) { Write-Host \"Stopping API PID $id\"; Stop-Process -Id $id -Force } } else { Write-Host 'No API listener on 5080.' }\n# stop any dotnet watch related processes\n$watch = Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'dotnet(\\.exe)?' -and $_.CommandLine -match 'dotnet\\s+watch' -and $_.CommandLine -match 'BroccoliTours\\.Api' }\nif ($watch) { foreach ($p in $watch) { Write-Host \"Stopping watch PID $($p.ProcessId)\"; Stop-Process -Id $p.ProcessId -Force } } else { Write-Host 'No dotnet watch process found.' }\nStart-Sleep -Seconds 1\nif (Get-NetTCPConnection -LocalPort 5080 -State Listen -ErrorAction SilentlyContinue) { Write-Host 'Port 5080 still LISTEN' } else { Write-Host 'Port 5080 free' }"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "ops: check backend port",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"if (Get-NetTCPConnection -LocalPort 5080 -State Listen -ErrorAction SilentlyContinue) { Write-Host 'Port 5080 LISTEN' } else { Write-Host 'Port 5080 free' }"
+			],
+			"isBackground": false
+		}
+	]
+}
