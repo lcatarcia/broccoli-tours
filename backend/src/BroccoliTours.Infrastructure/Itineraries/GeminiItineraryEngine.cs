@@ -43,7 +43,7 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
         var endpoint = $"https://generativelanguage.googleapis.com/v1beta/models/{_model}:generateContent?key={_apiKey}";
         Console.WriteLine($"Request URL: {endpoint}");
         Console.WriteLine($"Model: {_model}");
-        
+
         using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
         {
             Content = new StringContent(BuildRequestJson(prompt), Encoding.UTF8, "application/json")
@@ -58,7 +58,7 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
             Console.WriteLine($"================== GEMINI ERROR ==================");
             Console.WriteLine($"Status Code: {response.StatusCode}");
             Console.WriteLine($"Response: {responseBody}");
-            Console.WriteLine($"Request URL: {endpoint}");
+            Console.WriteLine($"Request URL: {_http.BaseAddress}{requestUrl}");
             Console.WriteLine("==================================================");
         }
 
