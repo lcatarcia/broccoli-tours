@@ -33,7 +33,9 @@ public class StubItineraryEngineTests
             CamperModelName: "Test Camper",
             PartySize: 2,
             WeekendTrip: false,
-            AvoidOvertourism: true
+            AvoidOvertourism: true,
+            MinDailyDriveHours: 2,
+            MaxDailyDriveHours: 4
         );
 
         // Act
@@ -63,7 +65,9 @@ public class StubItineraryEngineTests
             CamperModelName: "Test Camper",
             PartySize: 2,
             WeekendTrip: false,
-            AvoidOvertourism: true
+            AvoidOvertourism: true,
+            MinDailyDriveHours: 2,
+            MaxDailyDriveHours: 4
         );
 
         // Act
@@ -95,7 +99,9 @@ public class StubItineraryEngineTests
             CamperModelName: "Test Camper",
             PartySize: 2,
             WeekendTrip: false,
-            AvoidOvertourism: true
+            AvoidOvertourism: true,
+            MinDailyDriveHours: 2,
+            MaxDailyDriveHours: 4
         );
 
         // Act
@@ -127,7 +133,9 @@ public class StubItineraryEngineTests
             CamperModelName: "Test Camper",
             PartySize: 2,
             WeekendTrip: false,
-            AvoidOvertourism: true
+            AvoidOvertourism: true,
+            MinDailyDriveHours: 2,
+            MaxDailyDriveHours: 4
         );
 
         // Act

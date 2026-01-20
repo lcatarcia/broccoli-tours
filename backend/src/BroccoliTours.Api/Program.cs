@@ -6,7 +6,11 @@ using BroccoliTours.Infrastructure.DependencyInjection;
 using BroccoliTours.Infrastructure.Itineraries;
 using BroccoliTours.Infrastructure.Pdf;
 
+using DotNetEnv;
+
 var builder = WebApplication.CreateBuilder(args);
+
+Env.Load();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
