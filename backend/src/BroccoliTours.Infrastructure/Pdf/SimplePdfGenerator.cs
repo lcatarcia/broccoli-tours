@@ -110,13 +110,13 @@ public sealed class SimplePdfGenerator : IPdfGenerator
             parts.Add($"GIORNO {d.DayNumber}: {d.Title.ToUpper()}" + (d.Date.HasValue ? $" - {d.Date:dd/MM/yyyy}" : string.Empty));
             parts.Add("═══════════════════════════════════════════════════════════════════════════════");
             parts.Add("");
-            
+
             if (d.DriveHoursEstimate.HasValue && d.DriveHoursEstimate > 0)
             {
                 parts.Add($"🚗 Tempo di guida stimato: {d.DriveHoursEstimate:F1} ore");
                 parts.Add("");
             }
-            
+
             if (d.Stops.Count > 0)
             {
                 parts.Add("📍 TAPPE:");
@@ -131,7 +131,7 @@ public sealed class SimplePdfGenerator : IPdfGenerator
                 }
                 parts.Add("");
             }
-            
+
             if (d.Activities.Count > 0)
             {
                 parts.Add("🎯 ATTIVITÀ CONSIGLIATE:");
@@ -139,7 +139,7 @@ public sealed class SimplePdfGenerator : IPdfGenerator
                 parts.Add("  • " + string.Join("\n  • ", d.Activities));
                 parts.Add("");
             }
-            
+
             if (!string.IsNullOrEmpty(d.OvernightStopRecommendation))
             {
                 parts.Add("🌙 SOSTA NOTTURNA:");
