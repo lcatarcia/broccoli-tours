@@ -58,7 +58,7 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
             Console.WriteLine($"================== GEMINI ERROR ==================");
             Console.WriteLine($"Status Code: {response.StatusCode}");
             Console.WriteLine($"Response: {responseBody}");
-            Console.WriteLine($"Request URL: {_http.BaseAddress}{requestUrl}");
+            Console.WriteLine($"Request URL: {endpoint}");
             Console.WriteLine("==================================================");
         }
 
