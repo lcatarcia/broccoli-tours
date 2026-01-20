@@ -154,32 +154,32 @@ export default function Home() {
                     <div className="drive-hours-selector">
                         <div className="form-group">
                             <label>Minimo: {minDriveHours} ore</label>
-                            <input 
-                                type="range" 
-                                min="1" 
-                                max="8" 
-                                step="0.5" 
-                                value={minDriveHours} 
+                            <input
+                                type="range"
+                                min="1"
+                                max="8"
+                                step="0.5"
+                                value={minDriveHours}
                                 onChange={e => {
                                     const val = parseFloat(e.target.value);
                                     setMinDriveHours(val);
                                     if (val > maxDriveHours) setMaxDriveHours(val);
-                                }} 
+                                }}
                             />
                         </div>
                         <div className="form-group">
                             <label>Massimo: {maxDriveHours} ore</label>
-                            <input 
-                                type="range" 
-                                min="1" 
-                                max="8" 
-                                step="0.5" 
-                                value={maxDriveHours} 
+                            <input
+                                type="range"
+                                min="1"
+                                max="8"
+                                step="0.5"
+                                value={maxDriveHours}
                                 onChange={e => {
                                     const val = parseFloat(e.target.value);
                                     setMaxDriveHours(val);
                                     if (val < minDriveHours) setMinDriveHours(val);
-                                }} 
+                                }}
                             />
                         </div>
                     </div>
