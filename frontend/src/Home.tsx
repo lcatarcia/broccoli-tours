@@ -102,7 +102,7 @@ export default function Home() {
                         <option value="">Seleziona un camper</option>
                         {campers.map(c => (
                             <option key={c.id} value={c.name}>
-                                {c.name} ({c.category}, {c.capacity} posti)
+                                {c.name} - {c.description}
                             </option>
                         ))}
                     </select>

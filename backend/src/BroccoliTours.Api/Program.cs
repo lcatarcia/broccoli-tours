@@ -10,7 +10,18 @@ using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Env.Load();
+// Load .env from repository root (3 levels up from bin/Debug/net9.0)
+var envPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "..", ".env");
+if (File.Exists(envPath))
+{
+    Env.Load(envPath);
+    Console.WriteLine($"✓ Loaded .env from: {Path.GetFullPath(envPath)}");
+}
+else
+{
+    Console.WriteLine($"⚠️  .env not found at: {Path.GetFullPath(envPath)}");
+    Env.Load(); // Try default location
+}
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

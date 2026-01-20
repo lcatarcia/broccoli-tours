@@ -50,19 +50,32 @@ public sealed class SimplePdfGenerator : IPdfGenerator
         {
             itinerary.Summary,
             "",
-            "DEPLIANT (panoramica)",
-            "- Periodo: " + FormatPeriod(itinerary),
-            "- Giorni: " + itinerary.Days.Count,
+            "═══════════════════════════════════════════════════════════════════════════════",
+            "DEPLIANT - Panoramica",
+            "═══════════════════════════════════════════════════════════════════════════════",
             "",
+            "Periodo: " + FormatPeriod(itinerary),
+            "Durata: " + itinerary.Days.Count + " giorni",
+            "",
+            "───────────────────────────────────────────────────────────────────────────────",
             "HIGHLIGHTS",
-            "- " + string.Join("\n- ", highlights),
+            "───────────────────────────────────────────────────────────────────────────────",
             "",
-            "PROGRAMMA",
-            "- " + string.Join("\n- ", dayTitles),
+            "✓ " + string.Join("\n✓ ", highlights),
             "",
-            "NOTE CAMPER",
-            "- Arriva in area sosta entro le 16:30 quando possibile.",
-            "- Verifica accessi/ZTL e manovre (soprattutto con motorhome)."
+            "───────────────────────────────────────────────────────────────────────────────",
+            "PROGRAMMA GIORNALIERO",
+            "───────────────────────────────────────────────────────────────────────────────",
+            "",
+            string.Join("\n", dayTitles),
+            "",
+            "───────────────────────────────────────────────────────────────────────────────",
+            "NOTE IMPORTANTI PER IL CAMPERISTA",
+            "───────────────────────────────────────────────────────────────────────────────",
+            "",
+            "• Arriva in area sosta entro le 16:30 quando possibile",
+            "• Verifica sempre accessi ZTL e spazi di manovra (soprattutto con motorhome)",
+            "• Porta sempre acqua potabile e scarico grigie a bordo"
         });
     }
 
@@ -72,31 +85,67 @@ public sealed class SimplePdfGenerator : IPdfGenerator
         {
             itinerary.Summary,
             "",
-            "DETTAGLIO ITINERARIO",
-            "Periodo: " + FormatPeriod(itinerary),
-            "Giorni: " + itinerary.Days.Count,
+            "═══════════════════════════════════════════════════════════════════════════════",
+            "ITINERARIO DETTAGLIATO",
+            "═══════════════════════════════════════════════════════════════════════════════",
             "",
-            "Consigli Broccoli:",
-            "- " + (itinerary.Tips.Count > 0 ? string.Join("\n- ", itinerary.Tips) : "(nessun consiglio)"),
+            "Periodo: " + FormatPeriod(itinerary),
+            "Durata: " + itinerary.Days.Count + " giorni",
             ""
         };
 
+        if (itinerary.Tips.Count > 0)
+        {
+            parts.Add("───────────────────────────────────────────────────────────────────────────────");
+            parts.Add("💡 CONSIGLI DAL TOUR OPERATOR");
+            parts.Add("───────────────────────────────────────────────────────────────────────────────");
+            parts.Add("");
+            parts.Add("✓ " + string.Join("\n✓ ", itinerary.Tips));
+            parts.Add("");
+        }
+
         foreach (var d in itinerary.Days.OrderBy(x => x.DayNumber))
         {
-            parts.Add($"Giorno {d.DayNumber}: {d.Title}" + (d.Date.HasValue ? $" ({d.Date:yyyy-MM-dd})" : string.Empty));
+            parts.Add("═══════════════════════════════════════════════════════════════════════════════");
+            parts.Add($"GIORNO {d.DayNumber}: {d.Title.ToUpper()}" + (d.Date.HasValue ? $" - {d.Date:dd/MM/yyyy}" : string.Empty));
+            parts.Add("═══════════════════════════════════════════════════════════════════════════════");
+            parts.Add("");
+            
             if (d.DriveHoursEstimate.HasValue && d.DriveHoursEstimate > 0)
             {
-                parts.Add($"Guida stimata: {d.DriveHoursEstimate:F1} ore");
+                parts.Add($"🚗 Tempo di guida stimato: {d.DriveHoursEstimate:F1} ore");
+                parts.Add("");
             }
-            parts.Add("Tappe:");
-            parts.Add("- " + (d.Stops.Count > 0 ? string.Join("\n- ", d.Stops.Select(s => s.Name)) : "(nessuna tappa)"));
-            parts.Add("Attività:");
-            parts.Add("- " + (d.Activities.Count > 0 ? string.Join("\n- ", d.Activities) : "(nessuna attività)"));
+            
+            if (d.Stops.Count > 0)
+            {
+                parts.Add("📍 TAPPE:");
+                parts.Add("");
+                foreach (var stop in d.Stops)
+                {
+                    parts.Add($"  • {stop.Name}");
+                    if (!string.IsNullOrEmpty(stop.Description))
+                    {
+                        parts.Add($"    {stop.Description}");
+                    }
+                }
+                parts.Add("");
+            }
+            
+            if (d.Activities.Count > 0)
+            {
+                parts.Add("🎯 ATTIVITÀ CONSIGLIATE:");
+                parts.Add("");
+                parts.Add("  • " + string.Join("\n  • ", d.Activities));
+                parts.Add("");
+            }
+            
             if (!string.IsNullOrEmpty(d.OvernightStopRecommendation))
             {
-                parts.Add($"Sosta notturna consigliata: {d.OvernightStopRecommendation}");
+                parts.Add("🌙 SOSTA NOTTURNA:");
+                parts.Add($"  {d.OvernightStopRecommendation}");
+                parts.Add("");
             }
-            parts.Add("");
         }
 
         return string.Join("\n", parts);
@@ -165,21 +214,17 @@ public sealed class SimplePdfGenerator : IPdfGenerator
 
         private static string BuildTextContent(IReadOnlyList<string> lines)
         {
-            // Start near top-left; move down each line.
+            // Start near top-left; move down each line with proper spacing.
             var sb = new StringBuilder();
             sb.Append("BT\n");
-            sb.Append("/F1 14 Tf\n");
-            sb.Append("50 800 Td\n");
+            sb.Append("/F1 10 Tf\n");  // Reduced to 10pt
+            sb.Append("14 TL\n");       // Leading (line spacing) = 14pt
+            sb.Append("50 780 Td\n");   // Start a bit lower
 
-            var first = true;
             foreach (var line in lines)
             {
                 var escaped = EscapePdfString(line);
-                if (!first)
-                    sb.Append("T*\n");
-
-                sb.Append('(').Append(escaped).Append(") Tj\n");
-                first = false;
+                sb.Append('(').Append(escaped).Append(") '\n");  // ' operator = move to next line and show text
             }
 
             sb.Append("ET\n");

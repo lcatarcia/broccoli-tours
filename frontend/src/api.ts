@@ -5,7 +5,16 @@ const API_BASE = 'http://localhost:5080/api';
 export async function getCampers(): Promise<Camper[]> {
     const response = await fetch(`${API_BASE}/campers`);
     if (!response.ok) throw new Error('Failed to fetch campers');
-    return response.json();
+    const data = await response.json();
+    return data.map((c: any) => ({
+        id: c.id,
+        name: c.modelName,
+        category: c.category,
+        description: c.notes,
+        capacity: c.sleeps,
+        length: c.lengthMeters,
+        isManualTransmission: false
+    }));
 }
 
 export async function getLocations(): Promise<Location[]> {

@@ -57,7 +57,18 @@ export default function Itinerary() {
                                             {stop.type === 'attraction' && '🎭'}
                                             {stop.type === 'village' && '🏘️'}
                                             {stop.type === 'camper_area' && '🏕️'}
-                                            {!['attraction', 'village', 'camper_area'].includes(stop.type) && stop.type}
+                                            {stop.type === 'viewpoint' && '👁️'}
+                                            {stop.type === 'food' && '🍽️'}
+                                            {stop.type === 'restaurant' && '🍴'}
+                                            {stop.type === 'cafe' && '☕'}
+                                            {stop.type === 'museum' && '🏛️'}
+                                            {stop.type === 'park' && '🌳'}
+                                            {stop.type === 'beach' && '🏖️'}
+                                            {stop.type === 'mountain' && '⛰️'}
+                                            {stop.type === 'lake' && '🏞️'}
+                                            {stop.type === 'shopping' && '🛍️'}
+                                            {stop.type === 'nightlife' && '🌃'}
+                                            {!['attraction', 'village', 'camper_area', 'viewpoint', 'food', 'restaurant', 'cafe', 'museum', 'park', 'beach', 'mountain', 'lake', 'shopping', 'nightlife'].includes(stop.type) && stop.type}
                                         </span>
                                         <p>{stop.description}</p>
                                     </div>
