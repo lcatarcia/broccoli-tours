@@ -34,8 +34,8 @@ export default function Itinerary() {
                 <h1>{itinerary.title}</h1>
                 <p className="summary">{itinerary.summary}</p>
                 <div className="actions">
-                    <a href={getPdfUrl(itinerary.id, 'detailed')} target="_blank" className="btn-pdf">📄 PDF Dettagliato</a>
-                    <a href={getPdfUrl(itinerary.id, 'brochure')} target="_blank" className="btn-pdf">📋 Brochure</a>
+                    <button onClick={() => window.open(getPdfUrl(itinerary.id, 'detailed'), '_blank')} className="btn-pdf">📄 PDF Dettagliato</button>
+                    <button onClick={() => window.open(getPdfUrl(itinerary.id, 'brochure'), '_blank')} className="btn-pdf">📋 Brochure</button>
                 </div>
             </header>
 
@@ -53,7 +53,12 @@ export default function Itinerary() {
                                 {day.stops.map((stop, i) => (
                                     <div key={i} className="stop">
                                         <h4>{stop.name}</h4>
-                                        <span className="stop-type">{stop.type}</span>
+                                        <span className="stop-type">
+                                            {stop.type === 'attraction' && '🎭'}
+                                            {stop.type === 'village' && '🏘️'}
+                                            {stop.type === 'camper_area' && '🏕️'}
+                                            {!['attraction', 'village', 'camper_area'].includes(stop.type) && stop.type}
+                                        </span>
                                         <p>{stop.description}</p>
                                     </div>
                                 ))}

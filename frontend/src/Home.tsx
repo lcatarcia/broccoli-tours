@@ -21,6 +21,8 @@ export default function Home() {
     const [endDate, setEndDate] = useState('');
     const [selectedMonth, setSelectedMonth] = useState('');
     const [avoidOvertourism, setAvoidOvertourism] = useState(true);
+    const [minDriveHours, setMinDriveHours] = useState(2);
+    const [maxDriveHours, setMaxDriveHours] = useState(4);
 
     useEffect(() => {
         Promise.all([getCampers(), getLocations()])
@@ -46,6 +48,8 @@ export default function Home() {
                 endDate: dateMode === 'specific' ? (endDate || undefined) : undefined,
                 suggestedMonth: dateMode === 'month' ? selectedMonth : undefined,
                 avoidOvertourism,
+                minDailyDriveHours: minDriveHours,
+                maxDailyDriveHours: maxDriveHours,
             });
             navigate('/itinerary', { state: { itinerary } });
         } catch (err) {
@@ -143,6 +147,42 @@ export default function Home() {
                             <option value="dicembre">Dicembre</option>
                         </select>
                     )}
+                </div>
+
+                <div className="form-group">
+                    <label>Ore di guida giornaliere</label>
+                    <div className="drive-hours-selector">
+                        <div className="form-group">
+                            <label>Minimo: {minDriveHours} ore</label>
+                            <input 
+                                type="range" 
+                                min="1" 
+                                max="8" 
+                                step="0.5" 
+                                value={minDriveHours} 
+                                onChange={e => {
+                                    const val = parseFloat(e.target.value);
+                                    setMinDriveHours(val);
+                                    if (val > maxDriveHours) setMaxDriveHours(val);
+                                }} 
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Massimo: {maxDriveHours} ore</label>
+                            <input 
+                                type="range" 
+                                min="1" 
+                                max="8" 
+                                step="0.5" 
+                                value={maxDriveHours} 
+                                onChange={e => {
+                                    const val = parseFloat(e.target.value);
+                                    setMaxDriveHours(val);
+                                    if (val < minDriveHours) setMinDriveHours(val);
+                                }} 
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <div className="form-group checkbox">

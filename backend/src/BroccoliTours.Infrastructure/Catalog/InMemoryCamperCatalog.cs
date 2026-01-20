@@ -7,25 +7,32 @@ public sealed class InMemoryCamperCatalog : ICamperCatalog
 {
     private static readonly IReadOnlyList<Camper> Campers = new List<Camper>
     {
-        new("van-01", "Fiat Ducato Camperized Van", CamperCategory.Van, 2, 5.40m, "Compatto, perfetto per weekend e strade strette."),
-        new("cv-01", "VW Grand California", CamperCategory.Campervan, 4, 6.84m, "Comodo per coppie o famiglie piccole."),
-        new("semi-01", "Adria Matrix (semi-integrato)", CamperCategory.SemiIntegrated, 4, 7.40m, "Ottimo equilibrio tra spazio e manovrabilità."),
-        new("int-01", "Hymer B-Class (integrale)", CamperCategory.Integrated, 4, 7.80m, "Molto confortevole per lunghi viaggi."),
-        new("mh-01", "Concorde Charisma (motorhome)", CamperCategory.Motorhome, 4, 9.50m, "Top di gamma: spazio e comfort assoluti."),
+        // Camper van
+        new("surfer-suite", "Surfer Suite", CamperCategory.Campervan, 4, 5.99m, "VW T6.1 California Ocean - Iconico van con tetto a soffietto, cucina integrata."),
+        new("sunrise-suite", "Sunrise Suite", CamperCategory.Campervan, 4, 5.99m, "Nuovo VW California Ocean / Coast - Design moderno e funzionale."),
+        new("beach-hostel", "Beach Hostel", CamperCategory.Campervan, 4, 5.99m, "VW T6.1 California Beach - Perfetto per piccoli gruppi e famiglie."),
+        new("camper-cabin", "Camper Cabin", CamperCategory.Campervan, 4, 5.40m, "Ford Nugget - Compatto e versatile per ogni destinazione."),
+        new("camper-cabin-deluxe", "Camper Cabin Deluxe", CamperCategory.Campervan, 4, 5.40m, "Ford Nugget Plus - Versione premium con comfort extra."),
+        new("travel-home", "Travel Home", CamperCategory.Campervan, 4, 5.14m, "Mercedes Marco Polo - Eleganza e tecnologia per viaggiatori esigenti."),
         
-        // RoadSurfer Fleet - Europe
-        new("rs-beach-hostel", "RoadSurfer Beach Hostel", CamperCategory.Campervan, 4, 5.99m, "VW California Ocean - Iconico van con tetto a soffietto, cucina integrata e bagno. Ideale per 2-4 persone."),
-        new("rs-beach-camper", "RoadSurfer Beach Camper", CamperCategory.Van, 2, 5.40m, "Camper van compatto stile VW - Perfetto per coppie, massima manovrabilità in città."),
-        new("rs-couple-camper", "RoadSurfer Couple Camper", CamperCategory.Van, 2, 5.40m, "Van compatto Mercedes/Fiat - Design moderno, cucina e letto matrimoniale. Perfetto per due."),
-        new("rs-family-van", "RoadSurfer Family Van", CamperCategory.Campervan, 4, 6.00m, "Van spazioso per famiglie - 4 posti letto, cucina completa e bagno interno."),
-        new("rs-beach-hostel-xl", "RoadSurfer Beach Hostel XL", CamperCategory.Campervan, 5, 6.20m, "VW California XXL - Versione allungata con più spazio e comfort."),
-        new("rs-surfer-suite", "RoadSurfer Surfer Suite", CamperCategory.SemiIntegrated, 4, 7.00m, "Semi-integrato premium - Bagno separato, cucina grande, ideale per viaggi lunghi."),
-        new("rs-family-standard", "RoadSurfer Family Standard", CamperCategory.SemiIntegrated, 4, 7.20m, "Mansardato famiglia - 4-5 posti letto, bagno completo, cucina attrezzata."),
-        new("rs-family-luxury", "RoadSurfer Family Luxury", CamperCategory.Integrated, 4, 7.50m, "Mansardato premium - Spazio extra, letti comodi, bagno grande. Top comfort."),
+        // Furgonati
+        new("family-finca", "Family Finca", CamperCategory.Van, 4, 6.00m, "Furgonato spazioso per famiglie con cucina completa e bagno interno."),
+        new("couple-cottage", "Couple Cottage", CamperCategory.Van, 2, 5.40m, "Van compatto ideale per coppie, design moderno e pratico."),
+        new("road-house", "Road House", CamperCategory.Van, 4, 6.00m, "Furgonato versatile con multiple configurazioni disponibili."),
+        new("couple-condo", "Couple Condo", CamperCategory.Van, 2, 5.40m, "Van premium per coppie con tutti i comfort."),
+        new("liberty-lodge", "Liberty Lodge", CamperCategory.Van, 4, 6.00m, "Furgonato con ampi spazi e dotazioni complete."),
+        new("horizon-hopper", "Horizon Hopper", CamperCategory.Van, 2, 5.49m, "Winnebago Revel 44E - Van 4x4 per avventure off-road."),
         
-        // RoadSurfer Fleet - North America
-        new("rs-couple-condo", "RoadSurfer Couple Condo", CamperCategory.Campervan, 4, 6.70m, "Class B RV Sprinter-style - Bagno interno, cucina, letto queen. Perfetto per coppie."),
-        new("rs-family-freedom", "RoadSurfer Family Freedom", CamperCategory.Motorhome, 5, 7.50m, "Thor Four Winds 22E - Class C RV con alcova, cucina/soggiorno, bagno completo."),
+        // Furgone 4x4
+        new("couple-cottage-offroad", "Couple Cottage Offroad", CamperCategory.Van, 2, 5.40m, "Versione offroad (4x4) per coppie avventurose."),
+        
+        // Autocaravan Semi-integrale
+        new("camper-castle", "Camper Castle", CamperCategory.SemiIntegrated, 4, 7.00m, "Semi-integrato spazioso con bagno separato e cucina attrezzata."),
+        new("cozy-cottage", "Cozy Cottage", CamperCategory.SemiIntegrated, 4, 6.80m, "Semi-integrato confortevole ideale per famiglie."),
+        new("van-villa", "Van Villa", CamperCategory.SemiIntegrated, 4, 5.99m, "VW T6.1 Knaus Tourer Van - Compatto ma completo."),
+        
+        // Autocaravan Mansardato
+        new("family-freedom", "Family Freedom", CamperCategory.Motorhome, 5, 7.50m, "Thor Four Winds 22E - Mansardato con alcova, cucina/soggiorno e bagno completo."),
     };
 
     public IReadOnlyList<Camper> GetAll() => Campers;

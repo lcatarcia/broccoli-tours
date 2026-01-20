@@ -55,4 +55,6 @@ export interface TravelPreferences {
     endDate?: string;
     suggestedMonth?: string;
     avoidOvertourism: boolean;
+    minDailyDriveHours?: number;
+    maxDailyDriveHours?: number;
 }
