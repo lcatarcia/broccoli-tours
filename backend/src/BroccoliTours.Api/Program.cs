@@ -162,7 +162,7 @@ internal sealed class ResilientItineraryEngine : IItineraryEngine
         catch (Exception ex)
         {
             Console.WriteLine($"[ResilientEngine] Primary failed: {ex.Message}");
-            
+
             if (_secondary != null)
             {
                 try
@@ -175,7 +175,7 @@ internal sealed class ResilientItineraryEngine : IItineraryEngine
                     Console.WriteLine($"[ResilientEngine] Secondary failed: {ex2.Message}");
                 }
             }
-            
+
             Console.WriteLine("[ResilientEngine] ⚠️  Both AI services unavailable - Using FALLBACK (Stub with sample data)");
             Console.WriteLine("[ResilientEngine] Tip: Check API quotas for Gemini and OpenAI");
             return await _fallback.SuggestAsync(preferences, cancellationToken);
