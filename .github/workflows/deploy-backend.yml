@@ -28,19 +28,19 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
-        run: dotnet restore ./BroccoliTours.sln
+        run: dotnet restore BroccoliTours.sln
         working-directory: ./backend
 
       - name: Build
-        run: dotnet build ./BroccoliTours.sln --configuration Release --no-restore
+        run: dotnet build BroccoliTours.sln --configuration Release --no-restore
         working-directory: ./backend
 
       - name: Run tests
-        run: dotnet test ./BroccoliTours.sln --configuration Release --no-build --verbosity normal
+        run: dotnet test BroccoliTours.sln --configuration Release --no-build --verbosity normal
         working-directory: ./backend
 
       - name: Publish
-        run: dotnet publish ./BroccoliTours.sln -c Release -o ${{env.DOTNET_ROOT}}/myapp --no-build
+        run: dotnet publish src/BroccoliTours.Api/BroccoliTours.Api.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp --no-build
         working-directory: ./backend
 
       - name: Deploy to Azure Web App
