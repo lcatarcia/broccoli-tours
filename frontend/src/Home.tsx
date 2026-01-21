@@ -62,7 +62,7 @@ export default function Home() {
     return (
         <div className="home">
             <header className="hero">
-                <img src="http://localhost:5080/images/ChatGPT%20Image%20Jan%2012,%202026,%2011_45_43%20AM.png" alt="Broccoli Tours Logo" className="hero-logo" />
+                <img src="/broccoli-logo.png" alt="Broccoli Tours Logo" className="hero-logo" />
                 <h1>Broccoli Tours</h1>
                 <p>Il tuo tour operator specializzato in viaggi in camper</p>
             </header>

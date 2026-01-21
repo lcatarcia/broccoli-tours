@@ -1,6 +1,10 @@
 import type { Camper, Location, Itinerary, TravelPreferences } from './types';
 
-const API_BASE = 'http://localhost:5080/api';
+const defaultApiBase = import.meta.env.DEV
+    ? 'http://localhost:5080/api'
+    : 'https://wa-bt.azurewebsites.net/api';
+
+const API_BASE = (import.meta.env.VITE_API_BASE ?? defaultApiBase).replace(/\/$/, '');
 
 export async function getCampers(): Promise<Camper[]> {
     const response = await fetch(`${API_BASE}/campers`);

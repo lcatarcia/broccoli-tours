@@ -53,6 +53,19 @@ Questo documento descrive come configurare i secrets necessari per il deployment
   - Deploy su Azure Static Web App
   - Gestione automatica delle preview per le Pull Request
 
+## Configurazioni aggiuntive
+
+### Variabili di build per il frontend
+- Il workflow imposta l'endpoint API tramite la variabile `VITE_API_BASE`
+- Per override locali crea `frontend/.env.production` partendo da [frontend/.env.production.example](frontend/.env.production.example)
+- Valore di default: `https://wa-bt.azurewebsites.net/api`
+
+### CORS del backend
+- Gli origin consentiti sono definiti in [backend/src/BroccoliTours.Api/appsettings.json](backend/src/BroccoliTours.Api/appsettings.json)
+- In produzione aggiungi/aggiorna la App Setting `Cors__AllowedOrigins` in Azure App Service includendo:
+  - `https://ambitious-stone-008c87e03.6.azurestaticapps.net`
+  - altri domini pubblici necessari
+
 ## Test del Deployment
 
 Dopo aver configurato i secrets:
