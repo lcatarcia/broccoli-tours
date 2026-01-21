@@ -13,38 +13,44 @@ jobs:
   build:
     runs-on: windows-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up .NET Core
+      - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.x'
+          dotnet-version: '8.0.x'
 
-      - name: Build with dotnet
-        run: dotnet build --configuration Release
+      - name: Build solution
+        run: dotnet build BroccoliTours.sln --configuration Release
+        working-directory: ./backend
 
-      - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+      - name: Run tests
+        run: dotnet test BroccoliTours.sln --configuration Release --no-build --verbosity normal
+        working-directory: ./backend
+
+      - name: Publish API
+        run: dotnet publish src/BroccoliTours.Api/BroccoliTours.Api.csproj --configuration Release --output "$env:RUNNER_TEMP\publish" --no-build
+        working-directory: ./backend
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          path: ${{ runner.temp }}\publish
 
   deploy:
     runs-on: windows-latest
     needs: build
-    
+
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: .net-app
-      
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
