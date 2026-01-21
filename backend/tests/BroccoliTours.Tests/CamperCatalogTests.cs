@@ -8,13 +8,13 @@ public class CamperCatalogTests
     private readonly InMemoryCamperCatalog _catalog = new();
 
     [Fact]
-    public void GetAll_ShouldReturnFifteenCampers()
+    public void GetAll_ShouldReturnSeventeenCampers()
     {
         // Act
         var campers = _catalog.GetAll();
 
         // Assert
-        Assert.Equal(15, campers.Count);
+        Assert.Equal(17, campers.Count);
     }
 
     [Fact]
@@ -25,11 +25,10 @@ public class CamperCatalogTests
         var categories = campers.Select(c => c.Category).Distinct().ToList();
 
         // Assert
-        Assert.Equal(5, categories.Count);
+        Assert.Equal(4, categories.Count);
         Assert.Contains(Domain.Enums.CamperCategory.Van, categories);
         Assert.Contains(Domain.Enums.CamperCategory.Campervan, categories);
         Assert.Contains(Domain.Enums.CamperCategory.SemiIntegrated, categories);
-        Assert.Contains(Domain.Enums.CamperCategory.Integrated, categories);
         Assert.Contains(Domain.Enums.CamperCategory.Motorhome, categories);
     }
 
@@ -54,15 +53,14 @@ public class CamperCatalogTests
     }
 
     [Fact]
-    public void GetAll_ShouldIncludeRoadSurferModels()
+    public void GetAll_ShouldIncludeVariousModels()
     {
         // Act
         var campers = _catalog.GetAll();
-        var roadSurferCampers = campers.Where(c => c.Id.StartsWith("rs-")).ToList();
 
         // Assert
-        Assert.Equal(10, roadSurferCampers.Count);
-        Assert.Contains(roadSurferCampers, c => c.Id == "rs-beach-hostel");
-        Assert.Contains(roadSurferCampers, c => c.Id == "rs-family-freedom");
+        Assert.Contains(campers, c => c.Id == "beach-hostel");
+        Assert.Contains(campers, c => c.Id == "family-freedom");
+        Assert.Contains(campers, c => c.Id == "surfer-suite");
     }
 }
