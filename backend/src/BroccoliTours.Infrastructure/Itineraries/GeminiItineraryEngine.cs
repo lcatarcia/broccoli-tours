@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 
 namespace BroccoliTours.Infrastructure.Itineraries;
 
@@ -15,6 +16,10 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
     private readonly ILocationCatalog _locations;
     private readonly string _apiKey;
     private readonly string _model;
+    
+    // Track JSON repair attempts for the current async context
+    private static readonly AsyncLocal<int> _jsonRepairAttempts = new AsyncLocal<int>();
+    public static int CurrentJsonRepairAttempts => _jsonRepairAttempts.Value;
 
     public GeminiItineraryEngine(HttpClient http, ILocationCatalog locations, string apiKey, string model = "gemini-1.5-flash")
     {
@@ -32,6 +37,9 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
 
     public async Task<Itinerary> SuggestAsync(TravelPreferences preferences, CancellationToken cancellationToken = default)
     {
+        // Reset repair attempts counter for this request
+        _jsonRepairAttempts.Value = 0;
+        
         var location = ResolveLocation(preferences);
         var prompt = BuildPrompt(preferences, location);
 
@@ -81,7 +89,7 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
         Itinerary itinerary;
         try
         {
-            itinerary = ParseItinerary(content, preferences);
+            itinerary = await ParseItineraryAsync(content, preferences, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -287,8 +295,10 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
         return content.Trim();
     }
 
-    private Itinerary ParseItinerary(string json, TravelPreferences preferences)
+    private async Task<Itinerary> ParseItineraryAsync(string json, TravelPreferences preferences, CancellationToken cancellationToken, int attemptNumber = 1)
     {
+        const int MaxRepairAttempts = 3;
+        
         // Validate it's not empty
         if (string.IsNullOrWhiteSpace(json))
         {
@@ -303,8 +313,24 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
         }
         catch (JsonException ex)
         {
-            Console.WriteLine($"JSON Parse Error at position {ex.BytePositionInLine}: {ex.Message}");
-            throw new InvalidOperationException($"Invalid JSON from Gemini: {ex.Message}", ex);
+            Console.WriteLine($"[Attempt {attemptNumber}] JSON Parse Error at position {ex.BytePositionInLine}: {ex.Message}");
+            
+            if (attemptNumber >= MaxRepairAttempts)
+            {
+                Console.WriteLine($"Failed to repair JSON after {MaxRepairAttempts} attempts");
+                throw new InvalidOperationException($"Invalid JSON from Gemini even after {MaxRepairAttempts} repair attempts: {ex.Message}", ex);
+            }
+            
+            Console.WriteLine($"Attempting to repair truncated JSON (attempt {attemptNumber}/{MaxRepairAttempts})...");
+            
+            // Increment the repair attempts counter
+            _jsonRepairAttempts.Value = attemptNumber;
+            
+            // Try to repair the JSON by completing it
+            var repairedJson = await RepairTruncatedJsonAsync(json, preferences, cancellationToken);
+            
+            // Recursively try to parse the repaired JSON
+            return await ParseItineraryAsync(repairedJson, preferences, cancellationToken, attemptNumber + 1);
         }
 
         using (doc)
@@ -374,6 +400,162 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
 
             return new Itinerary(id, title, summary, period, days, tips, DateTimeOffset.UtcNow);
         }
+    }
+
+    private async Task<string> RepairTruncatedJsonAsync(string truncatedJson, TravelPreferences preferences, CancellationToken cancellationToken)
+    {
+        Console.WriteLine("================== REPAIR REQUEST ==================");
+        Console.WriteLine($"Truncated JSON length: {truncatedJson.Length}");
+        Console.WriteLine($"Last 200 chars: {(truncatedJson.Length > 200 ? truncatedJson.Substring(truncatedJson.Length - 200) : truncatedJson)}");
+        Console.WriteLine("====================================================");
+
+        var location = ResolveLocation(preferences);
+        var originalPrompt = BuildPrompt(preferences, location);
+
+        var repairPrompt = $$"""
+        Il seguente JSON di un itinerario è stato troncato durante la generazione.
+        
+        JSON TRONCATO (DA MANTENERE ESATTAMENTE COSÌ):
+        {{truncatedJson}}
+        
+        CONTESTO ORIGINALE:
+        {{originalPrompt}}
+        
+        COMPITO CRITICO:
+        Il JSON sopra è stato interrotto. NON devi rigenerare tutto il JSON, ma solo CONTINUARE da dove si è interrotto.
+        
+        ISTRUZIONI:
+        1. Analizza il JSON troncato per capire ESATTAMENTE dove si è interrotto
+        2. Identifica se è stato interrotto nel mezzo di:
+           - Un oggetto (mancano campi e la chiusura })
+           - Un array (mancano elementi e la chiusura ])
+           - Una stringa (mancano caratteri e la chiusura ")
+        3. Genera SOLO la continuazione necessaria per completare il JSON
+        4. La continuazione deve:
+           - Completare l'elemento corrente (se interrotto)
+           - Aggiungere tutti gli elementi mancanti (giorni, stops, tips rimanenti)
+           - Chiudere tutti gli array e oggetti aperti
+           - Terminare con }
+        5. Rispetta il contesto originale per i contenuti mancanti
+        
+        FORMATO RISPOSTA:
+        Rispondi SOLO con la continuazione del JSON, senza ripetere la parte troncata.
+        La tua risposta verrà concatenata direttamente dopo il JSON troncato.
+        NON includere markdown, spiegazioni o il JSON completo - SOLO la continuazione.
+        
+        Esempio: se il JSON troncato finisce con: "description": "Visita al m
+        La tua risposta dovrebbe iniziare con: useo", "latitude": 45.4...
+        """;
+
+        var endpoint = $"https://generativelanguage.googleapis.com/v1beta/models/{_model}:generateContent?key={_apiKey}";
+        
+        using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
+        {
+            Content = new StringContent(BuildRepairRequestJson(repairPrompt), Encoding.UTF8, "application/json")
+        };
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+        using var response = await _http.SendAsync(request, cancellationToken);
+        var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            Console.WriteLine($"================== REPAIR ERROR ==================");
+            Console.WriteLine($"Status Code: {response.StatusCode}");
+            Console.WriteLine($"Response: {responseBody}");
+            Console.WriteLine("==================================================");
+            throw new InvalidOperationException($"Failed to repair JSON: {response.StatusCode}");
+        }
+
+        var continuation = ExtractContent(responseBody);
+        continuation = StripCodeFences(continuation);
+
+        Console.WriteLine("================== JSON CONTINUATION ==================");
+        Console.WriteLine(continuation);
+        Console.WriteLine("=======================================================");
+        
+        // Concatenate truncated JSON with continuation
+        var repairedContent = truncatedJson + continuation;
+
+        Console.WriteLine("================== REPAIRED JSON (FULL) ==================");
+        Console.WriteLine(repairedContent);
+        Console.WriteLine("=========================================================");
+        
+        // Validate JSON structure
+        if (!IsJsonStructurallyValid(repairedContent))
+        {
+            Console.WriteLine("WARNING: Repaired JSON appears to be structurally invalid (unbalanced brackets/braces)");
+        }
+
+        return repairedContent;
+    }
+    
+    private string BuildRepairRequestJson(string prompt)
+    {
+        var payload = new
+        {
+            contents = new[]
+            {
+                new
+                {
+                    parts = new[] { new { text = prompt } }
+                }
+            },
+            generationConfig = new
+            {
+                temperature = 0.3, // Lower temperature for more precise repair
+                maxOutputTokens = 8192, // Sufficient for continuation only (not full regeneration)
+                responseMimeType = "application/json"
+            }
+        };
+
+        return JsonSerializer.Serialize(payload);
+    }
+    
+    private bool IsJsonStructurallyValid(string json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return false;
+        
+        int braceCount = 0;
+        int bracketCount = 0;
+        bool inString = false;
+        bool escaped = false;
+        
+        foreach (char c in json)
+        {
+            if (escaped)
+            {
+                escaped = false;
+                continue;
+            }
+            
+            if (c == '\\' && inString)
+            {
+                escaped = true;
+                continue;
+            }
+            
+            if (c == '"')
+            {
+                inString = !inString;
+                continue;
+            }
+            
+            if (!inString)
+            {
+                if (c == '{') braceCount++;
+                else if (c == '}') braceCount--;
+                else if (c == '[') bracketCount++;
+                else if (c == ']') bracketCount--;
+            }
+        }
+        
+        bool isValid = braceCount == 0 && bracketCount == 0 && !inString;
+        if (!isValid)
+        {
+            Console.WriteLine($"Structural validation: braces={braceCount}, brackets={bracketCount}, inString={inString}");
+        }
+        return isValid;
     }
 
     private Itinerary EnsureCoordinates(Itinerary itinerary, Location baseLocation)

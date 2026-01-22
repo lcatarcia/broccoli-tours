@@ -34,7 +34,7 @@ export async function getLocations(): Promise<Location[]> {
     return response.json();
 }
 
-export async function suggestItinerary(preferences: TravelPreferences): Promise<Itinerary> {
+export async function suggestItinerary(preferences: TravelPreferences): Promise<{ itinerary: Itinerary; repairAttempts?: number }> {
     const response = await fetch(`${API_BASE}/itineraries/suggest`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -47,8 +47,13 @@ export async function suggestItinerary(preferences: TravelPreferences): Promise<
     if (usedFallback) {
         throw new Error('FALLBACK_USED');
     }
+    
+    // Check if JSON repair was needed
+    const repairAttemptsHeader = response.headers.get('X-Json-Repair-Attempts');
+    const repairAttempts = repairAttemptsHeader ? parseInt(repairAttemptsHeader, 10) : undefined;
 
-    return response.json();
+    const itinerary = await response.json();
+    return { itinerary, repairAttempts };
 }
 
 export function getPdfUrl(itineraryId: string, mode: 'detailed' | 'brochure' = 'detailed'): string {

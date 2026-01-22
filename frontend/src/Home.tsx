@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCampers, getLocations, suggestItinerary } from './api';
 import type { Camper, Location } from './types';
+import { useToast } from './useToast';
 import './Home.css';
 import './Modal.css';
 
@@ -27,6 +28,7 @@ function ErrorModal({ message, onClose }: { message: string; onClose: () => void
 
 export default function Home() {
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const [campers, setCampers] = useState<Camper[]>([]);
     const [locations, setLocations] = useState<Location[]>([]);
     const [loading, setLoading] = useState(false);
@@ -62,7 +64,7 @@ export default function Home() {
         setLoading(true);
 
         try {
-            const itinerary = await suggestItinerary({
+            const result = await suggestItinerary({
                 locationId: useCustomDestination ? undefined : selectedLocation,
                 locationQuery: useCustomDestination ? customDestination : undefined,
                 camperModelName: selectedCamper,
@@ -75,7 +77,39 @@ export default function Home() {
                 minDailyDriveHours: minDriveHours,
                 maxDailyDriveHours: maxDriveHours,
             });
-            navigate('/itinerary', { state: { itinerary } });
+            
+            // Show toast for each JSON repair attempt
+            if (result.repairAttempts && result.repairAttempts > 0) {
+                for (let i = 1; i <= result.repairAttempts; i++) {
+                    showToast(
+                        `🔧 Riparazione JSON (tentativo ${i}/${result.repairAttempts}): il sistema sta correggendo la risposta dell'AI...`,
+                        'warning'
+                    );
+                    // Small delay between toasts
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
+            }
+            
+            navigate('/itinerary', { 
+                state: { 
+                    itinerary: result.itinerary,
+                    preferences: {
+                        useCustomDestination,
+                        selectedLocation,
+                        customDestination,
+                        selectedCamper,
+                        partySize,
+                        dateMode,
+                        startDate,
+                        endDate,
+                        selectedMonth,
+                        monthTripLength,
+                        avoidOvertourism,
+                        minDriveHours,
+                        maxDriveHours
+                    }
+                } 
+            });
         } catch (err) {
             console.error('Itinerary generation error:', err);
             const errorMessage = err instanceof Error && err.message === 'FALLBACK_USED'
