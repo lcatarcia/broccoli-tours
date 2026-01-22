@@ -135,12 +135,12 @@ app.MapPost("/api/itineraries/suggest", async (
     {
         context.Response.Headers["X-Broccoli-Fallback"] = "true";
     }
-    
+
     // Add header to track JSON repair attempts if any occurred
     var geminiRepairs = BroccoliTours.Infrastructure.Itineraries.GeminiItineraryEngine.CurrentJsonRepairAttempts;
     var openaiRepairs = BroccoliTours.Infrastructure.Itineraries.OpenAIItineraryEngine.CurrentJsonRepairAttempts;
     var totalRepairs = Math.Max(geminiRepairs, openaiRepairs);
-    
+
     if (totalRepairs > 0)
     {
         context.Response.Headers["X-Json-Repair-Attempts"] = totalRepairs.ToString();

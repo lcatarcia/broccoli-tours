@@ -14,7 +14,7 @@ public sealed class OpenAIItineraryEngine : IItineraryEngine
     private readonly ILocationCatalog _locations;
     private readonly string _apiKey;
     private readonly string _model;
-    
+
     // Track JSON repair attempts for the current async context
     private static readonly AsyncLocal<int> _jsonRepairAttempts = new AsyncLocal<int>();
     public static int CurrentJsonRepairAttempts => _jsonRepairAttempts.Value;
@@ -35,7 +35,7 @@ public sealed class OpenAIItineraryEngine : IItineraryEngine
     {
         // Reset repair attempts counter for this request
         _jsonRepairAttempts.Value = 0;
-        
+
         var location = ResolveLocation(preferences);
         var prompt = BuildPrompt(preferences, location);
 
@@ -251,7 +251,7 @@ public sealed class OpenAIItineraryEngine : IItineraryEngine
     private async Task<Itinerary> ParseItineraryAsync(string json, TravelPreferences preferences, Location? location, CancellationToken cancellationToken, int attemptNumber = 1)
     {
         const int MaxRepairAttempts = 3;
-        
+
         JsonDocument doc;
         try
         {
@@ -260,92 +260,92 @@ public sealed class OpenAIItineraryEngine : IItineraryEngine
         catch (JsonException ex)
         {
             Console.WriteLine($"[Attempt {attemptNumber}] JSON Parse Error at position {ex.BytePositionInLine}: {ex.Message}");
-            
+
             if (attemptNumber >= MaxRepairAttempts)
             {
                 Console.WriteLine($"Failed to repair JSON after {MaxRepairAttempts} attempts");
                 throw new InvalidOperationException($"Invalid JSON from OpenAI even after {MaxRepairAttempts} repair attempts: {ex.Message}", ex);
             }
-            
+
             Console.WriteLine($"Attempting to repair truncated JSON (attempt {attemptNumber}/{MaxRepairAttempts})...");
-            
+
             // Increment the repair attempts counter
             _jsonRepairAttempts.Value = attemptNumber;
-            
+
             var repairedJson = await RepairTruncatedJsonAsync(json, preferences, location, cancellationToken);
-            
+
             // Recursively try to parse the repaired JSON
             return await ParseItineraryAsync(repairedJson, preferences, location, cancellationToken, attemptNumber + 1);
         }
 
         using (doc)
         {
-        var root = doc.RootElement;
+            var root = doc.RootElement;
 
-        var id = root.GetProperty("id").GetString() ?? $"iti-{DateTimeOffset.UtcNow:yyyyMMddHHmmss}-{Random.Shared.Next(100, 999)}";
-        var title = root.GetProperty("title").GetString() ?? "Broccoli Tours — Itinerary";
-        var summary = root.GetProperty("summary").GetString() ?? "";
+            var id = root.GetProperty("id").GetString() ?? $"iti-{DateTimeOffset.UtcNow:yyyyMMddHHmmss}-{Random.Shared.Next(100, 999)}";
+            var title = root.GetProperty("title").GetString() ?? "Broccoli Tours — Itinerary";
+            var summary = root.GetProperty("summary").GetString() ?? "";
 
-        var periodEl = root.GetProperty("period");
-        var typeStr = periodEl.GetProperty("type").GetString() ?? "SuggestedBest";
-        var type = Enum.TryParse<TravelPeriodType>(typeStr, ignoreCase: true, out var parsed) ? parsed : preferences.PeriodType;
+            var periodEl = root.GetProperty("period");
+            var typeStr = periodEl.GetProperty("type").GetString() ?? "SuggestedBest";
+            var type = Enum.TryParse<TravelPeriodType>(typeStr, ignoreCase: true, out var parsed) ? parsed : preferences.PeriodType;
 
-        DateOnly? startDate = ParseDateOnlyOrNull(periodEl, "startDate");
-        DateOnly? endDate = ParseDateOnlyOrNull(periodEl, "endDate");
-        int? month = ParseIntOrNull(periodEl, "month");
-        int? year = ParseIntOrNull(periodEl, "year");
+            DateOnly? startDate = ParseDateOnlyOrNull(periodEl, "startDate");
+            DateOnly? endDate = ParseDateOnlyOrNull(periodEl, "endDate");
+            int? month = ParseIntOrNull(periodEl, "month");
+            int? year = ParseIntOrNull(periodEl, "year");
 
-        var period = new TravelPeriod(type, startDate, endDate, month, year);
+            var period = new TravelPeriod(type, startDate, endDate, month, year);
 
-        var tips = root.TryGetProperty("tips", out var tipsEl) && tipsEl.ValueKind == JsonValueKind.Array
-            ? tipsEl.EnumerateArray().Select(x => x.GetString() ?? string.Empty).Where(s => !string.IsNullOrWhiteSpace(s)).ToList()
-            : new List<string>();
+            var tips = root.TryGetProperty("tips", out var tipsEl) && tipsEl.ValueKind == JsonValueKind.Array
+                ? tipsEl.EnumerateArray().Select(x => x.GetString() ?? string.Empty).Where(s => !string.IsNullOrWhiteSpace(s)).ToList()
+                : new List<string>();
 
-        var days = new List<ItineraryDay>();
-        if (root.TryGetProperty("days", out var daysEl) && daysEl.ValueKind == JsonValueKind.Array)
-        {
-            foreach (var d in daysEl.EnumerateArray())
+            var days = new List<ItineraryDay>();
+            if (root.TryGetProperty("days", out var daysEl) && daysEl.ValueKind == JsonValueKind.Array)
             {
-                var dayNumber = d.GetProperty("dayNumber").GetInt32();
-                var dayTitle = d.GetProperty("title").GetString() ?? $"Day {dayNumber}";
-                var date = ParseDateOnlyOrNull(d, "date");
-
-                var stops = new List<ItineraryStop>();
-                if (d.TryGetProperty("stops", out var stopsEl) && stopsEl.ValueKind == JsonValueKind.Array)
+                foreach (var d in daysEl.EnumerateArray())
                 {
-                    foreach (var s in stopsEl.EnumerateArray())
+                    var dayNumber = d.GetProperty("dayNumber").GetInt32();
+                    var dayTitle = d.GetProperty("title").GetString() ?? $"Day {dayNumber}";
+                    var date = ParseDateOnlyOrNull(d, "date");
+
+                    var stops = new List<ItineraryStop>();
+                    if (d.TryGetProperty("stops", out var stopsEl) && stopsEl.ValueKind == JsonValueKind.Array)
                     {
-                        var name = s.GetProperty("name").GetString() ?? "Stop";
-                        var desc = s.TryGetProperty("description", out var descEl) ? descEl.GetString() : null;
-                        var lat = s.TryGetProperty("latitude", out var latEl) ? latEl.GetDouble() : 0.0;
-                        var lon = s.TryGetProperty("longitude", out var lonEl) ? lonEl.GetDouble() : 0.0;
-                        var stype = s.TryGetProperty("type", out var typeEl2) ? (typeEl2.GetString() ?? "attraction") : "attraction";
+                        foreach (var s in stopsEl.EnumerateArray())
+                        {
+                            var name = s.GetProperty("name").GetString() ?? "Stop";
+                            var desc = s.TryGetProperty("description", out var descEl) ? descEl.GetString() : null;
+                            var lat = s.TryGetProperty("latitude", out var latEl) ? latEl.GetDouble() : 0.0;
+                            var lon = s.TryGetProperty("longitude", out var lonEl) ? lonEl.GetDouble() : 0.0;
+                            var stype = s.TryGetProperty("type", out var typeEl2) ? (typeEl2.GetString() ?? "attraction") : "attraction";
 
-                        stops.Add(new ItineraryStop(name, desc, lat, lon, stype));
+                            stops.Add(new ItineraryStop(name, desc, lat, lon, stype));
+                        }
                     }
+
+                    var activities = d.TryGetProperty("activities", out var actEl) && actEl.ValueKind == JsonValueKind.Array
+                        ? actEl.EnumerateArray().Select(x => x.GetString() ?? string.Empty).Where(s => !string.IsNullOrWhiteSpace(s)).ToList()
+                        : new List<string>();
+
+                    var driveHours = d.TryGetProperty("driveHoursEstimate", out var driveEl) && driveEl.ValueKind == JsonValueKind.Number
+                        ? (double?)driveEl.GetDouble()
+                        : null;
+
+                    var overnight = d.TryGetProperty("overnightStopRecommendation", out var overnightEl) && overnightEl.ValueKind == JsonValueKind.String
+                        ? overnightEl.GetString()
+                        : null;
+
+                    days.Add(new ItineraryDay(dayNumber, date, dayTitle, stops, activities, driveHours, overnight));
                 }
-
-                var activities = d.TryGetProperty("activities", out var actEl) && actEl.ValueKind == JsonValueKind.Array
-                    ? actEl.EnumerateArray().Select(x => x.GetString() ?? string.Empty).Where(s => !string.IsNullOrWhiteSpace(s)).ToList()
-                    : new List<string>();
-
-                var driveHours = d.TryGetProperty("driveHoursEstimate", out var driveEl) && driveEl.ValueKind == JsonValueKind.Number
-                    ? (double?)driveEl.GetDouble()
-                    : null;
-
-                var overnight = d.TryGetProperty("overnightStopRecommendation", out var overnightEl) && overnightEl.ValueKind == JsonValueKind.String
-                    ? overnightEl.GetString()
-                    : null;
-
-                days.Add(new ItineraryDay(dayNumber, date, dayTitle, stops, activities, driveHours, overnight));
             }
-        }
 
-        var generatedAt = root.TryGetProperty("generatedAtUtc", out var genEl) && DateTimeOffset.TryParse(genEl.GetString(), out var dto)
-            ? dto
-            : DateTimeOffset.UtcNow;
+            var generatedAt = root.TryGetProperty("generatedAtUtc", out var genEl) && DateTimeOffset.TryParse(genEl.GetString(), out var dto)
+                ? dto
+                : DateTimeOffset.UtcNow;
 
-        return new Itinerary(id, title, summary, period, days, tips, generatedAt);
+            return new Itinerary(id, title, summary, period, days, tips, generatedAt);
         }
     }
 
@@ -399,7 +399,7 @@ public sealed class OpenAIItineraryEngine : IItineraryEngine
         };
 
         using var response = await _http.SendAsync(request, cancellationToken);
-        
+
         if (!response.IsSuccessStatusCode)
         {
             var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -417,14 +417,14 @@ public sealed class OpenAIItineraryEngine : IItineraryEngine
         Console.WriteLine("================== JSON CONTINUATION ==================");
         Console.WriteLine(continuation);
         Console.WriteLine("=======================================================");
-        
+
         // Concatenate truncated JSON with continuation
         var repairedContent = truncatedJson + continuation;
 
         Console.WriteLine("================== REPAIRED JSON (FULL) ==================");
         Console.WriteLine(repairedContent);
         Console.WriteLine("=========================================================");
-        
+
         // Validate JSON structure
         if (!IsJsonStructurallyValid(repairedContent))
         {
@@ -457,16 +457,16 @@ public sealed class OpenAIItineraryEngine : IItineraryEngine
 
         return JsonSerializer.Serialize(payload);
     }
-    
+
     private bool IsJsonStructurallyValid(string json)
     {
         if (string.IsNullOrWhiteSpace(json)) return false;
-        
+
         int braceCount = 0;
         int bracketCount = 0;
         bool inString = false;
         bool escaped = false;
-        
+
         foreach (char c in json)
         {
             if (escaped)
@@ -474,19 +474,19 @@ public sealed class OpenAIItineraryEngine : IItineraryEngine
                 escaped = false;
                 continue;
             }
-            
+
             if (c == '\\' && inString)
             {
                 escaped = true;
                 continue;
             }
-            
+
             if (c == '"')
             {
                 inString = !inString;
                 continue;
             }
-            
+
             if (!inString)
             {
                 if (c == '{') braceCount++;
@@ -495,7 +495,7 @@ public sealed class OpenAIItineraryEngine : IItineraryEngine
                 else if (c == ']') bracketCount--;
             }
         }
-        
+
         bool isValid = braceCount == 0 && bracketCount == 0 && !inString;
         if (!isValid)
         {

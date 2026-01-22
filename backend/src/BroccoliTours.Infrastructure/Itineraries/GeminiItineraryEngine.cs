@@ -16,7 +16,7 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
     private readonly ILocationCatalog _locations;
     private readonly string _apiKey;
     private readonly string _model;
-    
+
     // Track JSON repair attempts for the current async context
     private static readonly AsyncLocal<int> _jsonRepairAttempts = new AsyncLocal<int>();
     public static int CurrentJsonRepairAttempts => _jsonRepairAttempts.Value;
@@ -39,7 +39,7 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
     {
         // Reset repair attempts counter for this request
         _jsonRepairAttempts.Value = 0;
-        
+
         var location = ResolveLocation(preferences);
         var prompt = BuildPrompt(preferences, location);
 
@@ -298,7 +298,7 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
     private async Task<Itinerary> ParseItineraryAsync(string json, TravelPreferences preferences, CancellationToken cancellationToken, int attemptNumber = 1)
     {
         const int MaxRepairAttempts = 3;
-        
+
         // Validate it's not empty
         if (string.IsNullOrWhiteSpace(json))
         {
@@ -314,21 +314,21 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
         catch (JsonException ex)
         {
             Console.WriteLine($"[Attempt {attemptNumber}] JSON Parse Error at position {ex.BytePositionInLine}: {ex.Message}");
-            
+
             if (attemptNumber >= MaxRepairAttempts)
             {
                 Console.WriteLine($"Failed to repair JSON after {MaxRepairAttempts} attempts");
                 throw new InvalidOperationException($"Invalid JSON from Gemini even after {MaxRepairAttempts} repair attempts: {ex.Message}", ex);
             }
-            
+
             Console.WriteLine($"Attempting to repair truncated JSON (attempt {attemptNumber}/{MaxRepairAttempts})...");
-            
+
             // Increment the repair attempts counter
             _jsonRepairAttempts.Value = attemptNumber;
-            
+
             // Try to repair the JSON by completing it
             var repairedJson = await RepairTruncatedJsonAsync(json, preferences, cancellationToken);
-            
+
             // Recursively try to parse the repaired JSON
             return await ParseItineraryAsync(repairedJson, preferences, cancellationToken, attemptNumber + 1);
         }
@@ -448,7 +448,7 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
         """;
 
         var endpoint = $"https://generativelanguage.googleapis.com/v1beta/models/{_model}:generateContent?key={_apiKey}";
-        
+
         using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
         {
             Content = new StringContent(BuildRepairRequestJson(repairPrompt), Encoding.UTF8, "application/json")
@@ -473,14 +473,14 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
         Console.WriteLine("================== JSON CONTINUATION ==================");
         Console.WriteLine(continuation);
         Console.WriteLine("=======================================================");
-        
+
         // Concatenate truncated JSON with continuation
         var repairedContent = truncatedJson + continuation;
 
         Console.WriteLine("================== REPAIRED JSON (FULL) ==================");
         Console.WriteLine(repairedContent);
         Console.WriteLine("=========================================================");
-        
+
         // Validate JSON structure
         if (!IsJsonStructurallyValid(repairedContent))
         {
@@ -489,7 +489,7 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
 
         return repairedContent;
     }
-    
+
     private string BuildRepairRequestJson(string prompt)
     {
         var payload = new
@@ -511,16 +511,16 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
 
         return JsonSerializer.Serialize(payload);
     }
-    
+
     private bool IsJsonStructurallyValid(string json)
     {
         if (string.IsNullOrWhiteSpace(json)) return false;
-        
+
         int braceCount = 0;
         int bracketCount = 0;
         bool inString = false;
         bool escaped = false;
-        
+
         foreach (char c in json)
         {
             if (escaped)
@@ -528,19 +528,19 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
                 escaped = false;
                 continue;
             }
-            
+
             if (c == '\\' && inString)
             {
                 escaped = true;
                 continue;
             }
-            
+
             if (c == '"')
             {
                 inString = !inString;
                 continue;
             }
-            
+
             if (!inString)
             {
                 if (c == '{') braceCount++;
@@ -549,7 +549,7 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
                 else if (c == ']') bracketCount--;
             }
         }
-        
+
         bool isValid = braceCount == 0 && bracketCount == 0 && !inString;
         if (!isValid)
         {

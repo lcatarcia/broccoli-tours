@@ -149,7 +149,7 @@ export default function Itinerary() {
             </header>
 
             {showForm && (
-                <form onSubmit={handleRegenerate} className="booking-form" style={{marginBottom: '2rem'}}>
+                <form onSubmit={handleRegenerate} className="booking-form" style={{ marginBottom: '2rem' }}>
                     <h2>Modifica la tua richiesta</h2>
 
                     <div className="form-group">
@@ -299,11 +299,11 @@ export default function Itinerary() {
 
                     {error && <div className="error">{error}</div>}
 
-                    <div style={{display: 'flex', gap: '1rem'}}>
-                        <button type="submit" disabled={loading} className="btn-primary" style={{flex: 1}}>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button type="submit" disabled={loading} className="btn-primary" style={{ flex: 1 }}>
                             {loading ? 'Rigenerazione in corso...' : 'Rigenera Itinerario'}
                         </button>
-                        <button type="button" onClick={() => setShowForm(false)} className="btn-primary" style={{flex: 0, background: '#5a4a3a'}}>
+                        <button type="button" onClick={() => setShowForm(false)} className="btn-primary" style={{ flex: 0, background: '#5a4a3a' }}>
                             Annulla
                         </button>
                     </div>

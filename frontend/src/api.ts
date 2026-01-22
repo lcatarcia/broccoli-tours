@@ -47,7 +47,7 @@ export async function suggestItinerary(preferences: TravelPreferences): Promise<
     if (usedFallback) {
         throw new Error('FALLBACK_USED');
     }
-    
+
     // Check if JSON repair was needed
     const repairAttemptsHeader = response.headers.get('X-Json-Repair-Attempts');
     const repairAttempts = repairAttemptsHeader ? parseInt(repairAttemptsHeader, 10) : undefined;

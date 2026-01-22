@@ -15,9 +15,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     const showToast = useCallback((message: string, type: Toast['type'] = 'info') => {
         const id = `toast-${Date.now()}-${Math.random()}`;
         const newToast: Toast = { id, message, type };
-        
+
         setToasts(prev => [...prev, newToast]);
-        
+
         // Auto remove after 4 seconds
         setTimeout(() => {
             setToasts(prev => prev.filter(t => t.id !== id));
@@ -33,8 +33,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             {children}
             <div className="toast-container">
                 {toasts.map(toast => (
-                    <div 
-                        key={toast.id} 
+                    <div
+                        key={toast.id}
                         className={`toast toast-${toast.type}`}
                         onClick={() => removeToast(toast.id)}
                     >

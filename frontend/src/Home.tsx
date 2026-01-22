@@ -77,7 +77,7 @@ export default function Home() {
                 minDailyDriveHours: minDriveHours,
                 maxDailyDriveHours: maxDriveHours,
             });
-            
+
             // Show toast for each JSON repair attempt
             if (result.repairAttempts && result.repairAttempts > 0) {
                 for (let i = 1; i <= result.repairAttempts; i++) {
@@ -89,9 +89,9 @@ export default function Home() {
                     await new Promise(resolve => setTimeout(resolve, 300));
                 }
             }
-            
-            navigate('/itinerary', { 
-                state: { 
+
+            navigate('/itinerary', {
+                state: {
                     itinerary: result.itinerary,
                     preferences: {
                         useCustomDestination,
@@ -108,7 +108,7 @@ export default function Home() {
                         minDriveHours,
                         maxDriveHours
                     }
-                } 
+                }
             });
         } catch (err) {
             console.error('Itinerary generation error:', err);
