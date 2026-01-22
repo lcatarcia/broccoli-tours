@@ -2,7 +2,7 @@ import type { Camper, Location, Itinerary, TravelPreferences } from './types';
 
 const defaultApiBase = import.meta.env.DEV
     ? 'http://localhost:5080/api'
-    : 'https://wa-bt.azurewebsites.net/api';
+    : 'https://wa-bt-hgged7edc8gph9gz.italynorth-01.azurewebsites.net/api';
 
 const API_BASE = (import.meta.env.VITE_API_BASE ?? defaultApiBase).replace(/\/$/, '');
 

@@ -58,7 +58,7 @@ Questo documento descrive come configurare i secrets necessari per il deployment
 ### Variabili di build per il frontend
 - Il workflow imposta l'endpoint API tramite la variabile `VITE_API_BASE`
 - Per override locali crea `frontend/.env.production` partendo da [frontend/.env.production.example](frontend/.env.production.example)
-- Valore di default: `https://wa-bt.azurewebsites.net/api`
+- Valore di default: `https://wa-bt-hgged7edc8gph9gz.italynorth-01.azurewebsites.net/api`
 
 ### CORS del backend
 - Gli origin consentiti sono definiti in [backend/src/BroccoliTours.Api/appsettings.json](backend/src/BroccoliTours.Api/appsettings.json)
