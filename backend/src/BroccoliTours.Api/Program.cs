@@ -124,10 +124,18 @@ app.MapPost("/api/itineraries/suggest", async (
     TravelPreferences preferences,
     IItineraryEngine engine,
     IItineraryStore store,
+    HttpContext context,
     CancellationToken ct) =>
 {
     var itinerary = await engine.SuggestAsync(preferences, ct);
     store.Save(itinerary);
+    
+    // Check if fallback was used (stub engine returns generic data)
+    if (itinerary.Summary.Contains("massimizzare panorami e soste facili"))
+    {
+        context.Response.Headers["X-Broccoli-Fallback"] = "true";
+    }
+    
     return Results.Ok(itinerary);
 })
     .WithName("SuggestItinerary")

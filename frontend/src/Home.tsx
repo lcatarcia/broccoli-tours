@@ -78,7 +78,10 @@ export default function Home() {
             navigate('/itinerary', { state: { itinerary } });
         } catch (err) {
             console.error('Itinerary generation error:', err);
-            setError('La richiesta è troppo complessa o l\'API non è riuscita a elaborarla correttamente.');
+            const errorMessage = err instanceof Error && err.message === 'FALLBACK_USED'
+                ? 'La richiesta è troppo complessa per l\'intelligenza artificiale. L\'API Gemini non è riuscita a elaborarla correttamente.'
+                : 'Errore nella generazione dell\'itinerario. Riprova tra qualche istante.';
+            setError(errorMessage);
             setShowErrorModal(true);
         } finally {
             setLoading(false);
