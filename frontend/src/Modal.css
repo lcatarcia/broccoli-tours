@@ -1,0 +1,105 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background: linear-gradient(145deg, #2a2520 0%, #3a3530 100%);
+    border: 2px solid #f4a460;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    color: #f4a460;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.modal-content p {
+    color: #d4b896;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.modal-hint {
+    color: #c9a87c;
+    font-size: 0.95rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.modal-tips {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 1.5rem;
+}
+
+.modal-tips li {
+    color: #d4b896;
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.modal-tips li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #8b6f47;
+    font-weight: bold;
+}
+
+.btn-modal-close {
+    width: 100%;
+    padding: 0.875rem;
+    background: linear-gradient(135deg, #8b6f47 0%, #a0826d 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(139, 111, 71, 0.3);
+}
+
+.btn-modal-close:hover {
+    background: linear-gradient(135deg, #a0826d 0%, #b8956f 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(139, 111, 71, 0.4);
+}

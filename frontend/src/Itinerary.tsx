@@ -1,9 +1,18 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
+import L from 'leaflet';
 import type { Itinerary as ItineraryType } from './types';
 import { getPdfUrl } from './api';
 import 'leaflet/dist/leaflet.css';
 import './Itinerary.css';
+
+// Fix Leaflet default icon paths for production
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 
 export default function Itinerary() {
     const location = useLocation();
@@ -30,7 +39,7 @@ export default function Itinerary() {
         <div className="itinerary-page">
             <header className="itinerary-header">
                 <button onClick={() => navigate('/')} className="btn-back">← Torna alla ricerca</button>
-                <img src="http://localhost:5080/images/ChatGPT%20Image%20Jan%2012,%202026,%2011_45_43%20AM.png" alt="Broccoli Tours" className="itinerary-logo" />
+                <img src="/broccoli-logo.png" alt="Broccoli Tours" className="itinerary-logo" />
                 <h1>{itinerary.title}</h1>
                 <p className="summary">{itinerary.summary}</p>
                 <div className="actions">

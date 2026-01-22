@@ -9,8 +9,15 @@ const API_BASE = (import.meta.env.VITE_API_BASE ?? defaultApiBase).replace(/\/$/
 export async function getCampers(): Promise<Camper[]> {
     const response = await fetch(`${API_BASE}/campers`);
     if (!response.ok) throw new Error('Failed to fetch campers');
-    const data = await response.json();
-    return data.map((c: any) => ({
+    const data = await response.json() as Array<{
+        id: string;
+        modelName: string;
+        category: Camper['category'];
+        notes: string;
+        sleeps: number;
+        lengthMeters: number;
+    }>;
+    return data.map((c) => ({
         id: c.id,
         name: c.modelName,
         category: c.category,

@@ -3,6 +3,27 @@ import { useNavigate } from 'react-router-dom';
 import { getCampers, getLocations, suggestItinerary } from './api';
 import type { Camper, Location } from './types';
 import './Home.css';
+import './Modal.css';
+
+function ErrorModal({ message, onClose }: { message: string; onClose: () => void }) {
+    return (
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <h3>⚠️ Errore nella generazione</h3>
+                <p>{message}</p>
+                <p className="modal-hint">
+                    💡 <strong>Suggerimento:</strong> Prova a semplificare la richiesta:
+                </p>
+                <ul className="modal-tips">
+                    <li>Riduci il numero di giorni del viaggio</li>
+                    <li>Scegli una destinazione più specifica</li>
+                    <li>Evita periodi troppo lunghi o generici</li>
+                </ul>
+                <button onClick={onClose} className="btn-modal-close">Chiudi e riprova</button>
+            </div>
+        </div>
+    );
+}
 
 export default function Home() {
     const navigate = useNavigate();
@@ -24,6 +45,7 @@ export default function Home() {
     const [avoidOvertourism, setAvoidOvertourism] = useState(true);
     const [minDriveHours, setMinDriveHours] = useState(2);
     const [maxDriveHours, setMaxDriveHours] = useState(4);
+    const [showErrorModal, setShowErrorModal] = useState(false);
 
     useEffect(() => {
         Promise.all([getCampers(), getLocations()])
@@ -55,7 +77,9 @@ export default function Home() {
             });
             navigate('/itinerary', { state: { itinerary } });
         } catch (err) {
-            setError('Errore nella generazione dell\'itinerario');
+            console.error('Itinerary generation error:', err);
+            setError('La richiesta è troppo complessa o l\'API non è riuscita a elaborarla correttamente.');
+            setShowErrorModal(true);
         } finally {
             setLoading(false);
         }
@@ -63,6 +87,15 @@ export default function Home() {
 
     return (
         <div className="home">
+            {showErrorModal && (
+                <ErrorModal
+                    message={error}
+                    onClose={() => {
+                        setShowErrorModal(false);
+                        setError('');
+                    }}
+                />
+            )}
             <header className="hero">
                 <img src="/broccoli-logo.png" alt="Broccoli Tours Logo" className="hero-logo" />
                 <h1>Broccoli Tours</h1>
