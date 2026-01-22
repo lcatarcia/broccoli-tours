@@ -128,6 +128,9 @@ public sealed class OpenAIItineraryEngine : IItineraryEngine
 
         var weekend = preferences.WeekendTrip ? "yes" : "no";
         var avoid = preferences.AvoidOvertourism ? "yes" : "no";
+        var duration = preferences.TripDurationDays.HasValue
+            ? $"{preferences.TripDurationDays.Value} giorni totali di viaggio richiesti"
+            : "durata flessibile";
 
         // Usa LocationQuery custom se location è null, altrimenti usa i dati del catalogo
         var destinationName = location?.Name ?? preferences.LocationQuery ?? "Italia";
@@ -181,6 +184,7 @@ public sealed class OpenAIItineraryEngine : IItineraryEngine
         Vincoli cliente:
         - Destinazione (ancora): {destinationName} ({destinationRegion}), coordinate approx {destinationCoords}
         - Periodo: {period}
+        - Durata desiderata: {duration}
         - Weekend trip: {weekend}
         - Evita overtourism: {avoid}
         - Numero persone: {preferences.PartySize}

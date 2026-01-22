@@ -95,8 +95,14 @@ public sealed class StubItineraryEngine : IItineraryEngine
         if (preferences.AvoidOvertourism)
             baseTips.Add("Broccoli Tip: scegli attrazioni secondarie a 15–30 min dalle mete più note.");
 
-        // Build 3-day or 2-day itinerary depending on weekend
-        var dayCount = preferences.WeekendTrip ? 2 : 3;
+        var requestedDays = preferences.TripDurationDays.HasValue && preferences.TripDurationDays.Value > 0
+            ? preferences.TripDurationDays.Value
+            : (int?)null;
+
+        // Build itinerary length based on explicit duration (if provided) or fallback rules
+        var dayCount = requestedDays.HasValue
+            ? Math.Clamp(requestedDays.Value, 2, 21)
+            : preferences.WeekendTrip ? 2 : 3;
 
         var startDate = period.Type == TravelPeriodType.FixedDates ? period.StartDate : null;
 

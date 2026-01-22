@@ -20,6 +20,7 @@ export default function Home() {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [selectedMonth, setSelectedMonth] = useState('');
+    const [monthTripLength, setMonthTripLength] = useState(7);
     const [avoidOvertourism, setAvoidOvertourism] = useState(true);
     const [minDriveHours, setMinDriveHours] = useState(2);
     const [maxDriveHours, setMaxDriveHours] = useState(4);
@@ -47,6 +48,7 @@ export default function Home() {
                 startDate: dateMode === 'specific' ? (startDate || undefined) : undefined,
                 endDate: dateMode === 'specific' ? (endDate || undefined) : undefined,
                 suggestedMonth: dateMode === 'month' ? selectedMonth : undefined,
+                tripDurationDays: dateMode === 'month' ? monthTripLength : undefined,
                 avoidOvertourism,
                 minDailyDriveHours: minDriveHours,
                 maxDailyDriveHours: maxDriveHours,
@@ -131,21 +133,44 @@ export default function Home() {
                             </div>
                         </div>
                     ) : (
-                        <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)}>
-                            <option value="">Qualsiasi mese</option>
-                            <option value="gennaio">Gennaio</option>
-                            <option value="febbraio">Febbraio</option>
-                            <option value="marzo">Marzo</option>
-                            <option value="aprile">Aprile</option>
-                            <option value="maggio">Maggio</option>
-                            <option value="giugno">Giugno</option>
-                            <option value="luglio">Luglio</option>
-                            <option value="agosto">Agosto</option>
-                            <option value="settembre">Settembre</option>
-                            <option value="ottobre">Ottobre</option>
-                            <option value="novembre">Novembre</option>
-                            <option value="dicembre">Dicembre</option>
-                        </select>
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label>Mese preferito (opzionale)</label>
+                                <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)}>
+                                    <option value="">Qualsiasi mese</option>
+                                    <option value="gennaio">Gennaio</option>
+                                    <option value="febbraio">Febbraio</option>
+                                    <option value="marzo">Marzo</option>
+                                    <option value="aprile">Aprile</option>
+                                    <option value="maggio">Maggio</option>
+                                    <option value="giugno">Giugno</option>
+                                    <option value="luglio">Luglio</option>
+                                    <option value="agosto">Agosto</option>
+                                    <option value="settembre">Settembre</option>
+                                    <option value="ottobre">Ottobre</option>
+                                    <option value="novembre">Novembre</option>
+                                    <option value="dicembre">Dicembre</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Durata viaggio (giorni)</label>
+                                <input
+                                    type="number"
+                                    min={2}
+                                    max={30}
+                                    value={monthTripLength}
+                                    onChange={e => {
+                                        const numeric = Number(e.target.value);
+                                        if (Number.isNaN(numeric)) {
+                                            setMonthTripLength(2);
+                                            return;
+                                        }
+                                        const clamped = Math.min(30, Math.max(2, numeric));
+                                        setMonthTripLength(clamped);
+                                    }}
+                                />
+                            </div>
+                        </div>
                     )}
                 </div>
 

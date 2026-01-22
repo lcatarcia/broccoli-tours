@@ -161,6 +161,9 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
 
         var weekend = preferences.WeekendTrip ? "yes" : "no";
         var avoid = preferences.AvoidOvertourism ? "yes" : "no";
+        var duration = preferences.TripDurationDays.HasValue
+            ? $"{preferences.TripDurationDays.Value} giorni totali di viaggio richiesti"
+            : "durata flessibile";
 
         var destinationName = location?.Name ?? preferences.LocationQuery ?? "Italia";
         var destinationRegion = location?.Region ?? string.Empty;
@@ -215,6 +218,7 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
         Vincoli cliente:
         - Destinazione (ancora): {destinationName} ({destinationRegion}), coordinate approx {destinationCoords}
         - Periodo: {period}
+        - Durata desiderata: {duration}
         - Weekend trip: {weekend}
         - Evita overtourism: {avoid}
         - Numero persone: {preferences.PartySize}

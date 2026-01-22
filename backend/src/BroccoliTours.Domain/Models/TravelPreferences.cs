@@ -14,6 +14,7 @@ public sealed record TravelPreferences(
     CamperCategory? CamperCategory,
     string? CamperModelName,
     int PartySize,
+    int? TripDurationDays,
     bool WeekendTrip,
     bool AvoidOvertourism,
     double? MinDailyDriveHours,
