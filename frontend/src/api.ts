@@ -41,13 +41,13 @@ export async function suggestItinerary(preferences: TravelPreferences): Promise<
         body: JSON.stringify(preferences),
     });
     if (!response.ok) throw new Error('Failed to suggest itinerary');
-    
+
     // Check if fallback stub was used
     const usedFallback = response.headers.get('X-Broccoli-Fallback') === 'true';
     if (usedFallback) {
         throw new Error('FALLBACK_USED');
     }
-    
+
     return response.json();
 }
 
