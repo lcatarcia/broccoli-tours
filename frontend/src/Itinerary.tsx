@@ -70,7 +70,7 @@ export default function Itinerary() {
         setLoading(true);
 
         try {
-            const newItinerary = await suggestItinerary({
+            const result = await suggestItinerary({
                 locationId: useCustomDestination ? undefined : selectedLocation,
                 locationQuery: useCustomDestination ? customDestination : undefined,
                 camperModelName: selectedCamper,
@@ -83,7 +83,7 @@ export default function Itinerary() {
                 minDailyDriveHours: minDriveHours,
                 maxDailyDriveHours: maxDriveHours,
             });
-            setCurrentItinerary(newItinerary);
+            setCurrentItinerary(result.itinerary);
             setShowForm(false);
             window.scrollTo(0, 0);
         } catch (err) {
