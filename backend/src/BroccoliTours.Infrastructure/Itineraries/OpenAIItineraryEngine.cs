@@ -75,12 +75,12 @@ public sealed class OpenAIItineraryEngine : IItineraryEngine
 
         var all = _locations.GetAll();
         var match = all.FirstOrDefault(l => l.Name.ToLowerInvariant().Contains(query) || (l.Region ?? string.Empty).ToLowerInvariant().Contains(query));
-        
+
         // Se c'è una query custom e non trova match nel catalogo, restituisce null
         // in modo che BuildPrompt usi la query custom direttamente
         if (match == null && !string.IsNullOrWhiteSpace(preferences.LocationQuery))
             return null;
-            
+
         return match ?? all.First();
     }
 

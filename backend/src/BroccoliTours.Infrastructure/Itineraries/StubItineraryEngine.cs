@@ -18,7 +18,7 @@ public sealed class StubItineraryEngine : IItineraryEngine
         var location = ResolveLocation(preferences);
         var period = BuildPeriod(preferences);
 
-        var id = $"iti-{DateTimeOffset.UtcNow:yyyyMMddHHmmss}-{Random.Shared.Next(100,999)}";
+        var id = $"iti-{DateTimeOffset.UtcNow:yyyyMMddHHmmss}-{Random.Shared.Next(100, 999)}";
         var title = $"{location.Name} in camper — Broccoli Picks";
 
         var (tips, days) = BuildSampleItinerary(location, period, preferences);
@@ -51,7 +51,7 @@ public sealed class StubItineraryEngine : IItineraryEngine
 
         var all = _locations.GetAll();
         var match = all.FirstOrDefault(l => l.Name.ToLowerInvariant().Contains(query) || (l.Region ?? "").ToLowerInvariant().Contains(query));
-        
+
         // Se non trova match ma c'è LocationQuery custom, crea una location fittizia con quel nome
         if (match == null && !string.IsNullOrWhiteSpace(preferences.LocationQuery))
         {
@@ -65,7 +65,7 @@ public sealed class StubItineraryEngine : IItineraryEngine
                 Description: $"Destinazione personalizzata: {preferences.LocationQuery}"
             );
         }
-        
+
         return match ?? all.First();
     }
 
