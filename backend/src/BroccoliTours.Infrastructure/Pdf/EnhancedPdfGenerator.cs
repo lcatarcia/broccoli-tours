@@ -23,14 +23,14 @@ public sealed class EnhancedPdfGenerator : IPdfGenerator
     public Task<byte[]> GenerateAsync(Itinerary itinerary, string mode, CancellationToken cancellationToken = default)
     {
         var isBrochure = mode.Equals("brochure", StringComparison.OrdinalIgnoreCase);
-        
+
         var document = Document.Create(container =>
         {
             container.Page(page =>
             {
                 page.Size(PageSizes.A4);
                 page.Margin(40);
-                
+
                 page.Header().Element(c => { ComposeHeader(c, itinerary, isBrochure); });
                 page.Content().Element(c => { if (isBrochure) ComposeBrochure(c, itinerary); else ComposeDetailed(c, itinerary); });
                 page.Footer().Element(c => { ComposeFooter(c); });
@@ -47,7 +47,7 @@ public sealed class EnhancedPdfGenerator : IPdfGenerator
         {
             // Box decorativo superiore
             column.Item().Background(BrandBrown).Height(8);
-            
+
             column.Item().PaddingVertical(15).Column(inner =>
             {
                 // Logo/Brand
@@ -55,19 +55,19 @@ public sealed class EnhancedPdfGenerator : IPdfGenerator
                     .FontSize(24)
                     .Bold()
                     .FontColor(BrandOrange);
-                
+
                 inner.Item().AlignCenter().Text("CAMPER ADVENTURES")
                     .FontSize(12)
                     .FontColor(BrandAccent);
-                
+
                 inner.Item().PaddingTop(5).AlignCenter().Text("Il tuo tour operator specializzato in viaggi in camper")
                     .FontSize(9)
                     .Italic()
                     .FontColor(BrandAccent);
             });
-            
+
             column.Item().Background(BrandBrown).Height(2);
-            
+
             // Titolo itinerario
             column.Item().PaddingTop(15).Column(inner =>
             {
@@ -75,7 +75,7 @@ public sealed class EnhancedPdfGenerator : IPdfGenerator
                     .FontSize(20)
                     .Bold()
                     .FontColor(BrandOrange);
-                
+
                 if (isBrochure)
                 {
                     inner.Item().Text("(Brochure)")
@@ -90,12 +90,12 @@ public sealed class EnhancedPdfGenerator : IPdfGenerator
                         .Italic()
                         .FontColor(BrandAccent);
                 }
-                
+
                 inner.Item().PaddingTop(8).Text(itinerary.Summary)
                     .FontSize(11)
                     .FontColor(Colors.Grey.Darken2);
             });
-            
+
             column.Item().PaddingTop(10).Background(BrandAccent).Height(1);
         });
     }
@@ -125,7 +125,7 @@ public sealed class EnhancedPdfGenerator : IPdfGenerator
                         text.Span("📅 Periodo: ").Bold().FontColor(BrandBrown);
                         text.Span(FormatPeriod(itinerary)).FontSize(10);
                     });
-                    
+
                     row.RelativeItem().Text(text =>
                     {
                         text.Span("⏱️ Durata: ").Bold().FontColor(BrandBrown);
@@ -146,7 +146,7 @@ public sealed class EnhancedPdfGenerator : IPdfGenerator
                         .FontSize(14)
                         .Bold()
                         .FontColor(BrandOrange);
-                    
+
                     inner.Item().PaddingTop(8).Column(highlights =>
                     {
                         foreach (var tip in itinerary.Tips.Take(6))
@@ -170,7 +170,7 @@ public sealed class EnhancedPdfGenerator : IPdfGenerator
                     .FontSize(14)
                     .Bold()
                     .FontColor(BrandOrange);
-                
+
                 inner.Item().PaddingTop(8).Column(days =>
                 {
                     foreach (var day in itinerary.Days.OrderBy(d => d.DayNumber))
@@ -192,12 +192,12 @@ public sealed class EnhancedPdfGenerator : IPdfGenerator
             column.Item().PaddingTop(15).Column(inner =>
             {
                 inner.Item().Background(BrandAccent).Height(1);
-                
+
                 inner.Item().PaddingTop(10).Text("⚠️ NOTE IMPORTANTI PER IL CAMPERISTA")
                     .FontSize(12)
                     .Bold()
                     .FontColor(BrandOrange);
-                
+
                 inner.Item().PaddingTop(8).Column(notes =>
                 {
                     var importantNotes = new[]
@@ -206,7 +206,7 @@ public sealed class EnhancedPdfGenerator : IPdfGenerator
                         "Verifica sempre accessi ZTL e spazi di manovra (soprattutto con motorhome)",
                         "Porta sempre acqua potabile e scarico grigie a bordo"
                     };
-                    
+
                     foreach (var note in importantNotes)
                     {
                         notes.Item().PaddingBottom(4).Row(row =>
@@ -234,7 +234,7 @@ public sealed class EnhancedPdfGenerator : IPdfGenerator
                         text.Span("📅 Periodo: ").Bold().FontColor(BrandBrown);
                         text.Span(FormatPeriod(itinerary)).FontSize(10);
                     });
-                    
+
                     row.RelativeItem().Text(text =>
                     {
                         text.Span("⏱️ Durata: ").Bold().FontColor(BrandBrown);
@@ -254,7 +254,7 @@ public sealed class EnhancedPdfGenerator : IPdfGenerator
                         .FontSize(14)
                         .Bold()
                         .FontColor(BrandOrange);
-                    
+
                     inner.Item().PaddingTop(8).Column(tips =>
                     {
                         foreach (var tip in itinerary.Tips)
@@ -275,7 +275,7 @@ public sealed class EnhancedPdfGenerator : IPdfGenerator
             foreach (var day in itinerary.Days.OrderBy(d => d.DayNumber))
             {
                 column.Item().PageBreak();
-                
+
                 column.Item().Column(dayColumn =>
                 {
                     // Header del giorno
@@ -285,7 +285,7 @@ public sealed class EnhancedPdfGenerator : IPdfGenerator
                             .FontSize(14)
                             .Bold()
                             .FontColor(Colors.White);
-                        
+
                         if (day.Date.HasValue)
                         {
                             dayHeader.Item().Text($"📅 {day.Date:dd/MM/yyyy}")
@@ -313,7 +313,7 @@ public sealed class EnhancedPdfGenerator : IPdfGenerator
                                 .FontSize(12)
                                 .Bold()
                                 .FontColor(BrandOrange);
-                            
+
                             stopsSection.Item().PaddingTop(8).Column(stops =>
                             {
                                 foreach (var stop in day.Stops)
@@ -321,13 +321,13 @@ public sealed class EnhancedPdfGenerator : IPdfGenerator
                                     stops.Item().PaddingBottom(8).Column(stopItem =>
                                     {
                                         var emoji = GetStopEmoji(stop.Type);
-                                        
+
                                         stopItem.Item().Text(text =>
                                         {
                                             text.Span($"{emoji} ").FontSize(12);
                                             text.Span(stop.Name).Bold().FontSize(11).FontColor(BrandBrown);
                                         });
-                                        
+
                                         if (!string.IsNullOrEmpty(stop.Description))
                                         {
                                             stopItem.Item().PaddingLeft(20).PaddingTop(2).Text(stop.Description)
@@ -349,7 +349,7 @@ public sealed class EnhancedPdfGenerator : IPdfGenerator
                                 .FontSize(12)
                                 .Bold()
                                 .FontColor(BrandOrange);
-                            
+
                             activitiesSection.Item().PaddingTop(8).Column(activities =>
                             {
                                 foreach (var activity in day.Activities)
@@ -373,7 +373,7 @@ public sealed class EnhancedPdfGenerator : IPdfGenerator
                                 .FontSize(11)
                                 .Bold()
                                 .FontColor(BrandBrown);
-                            
+
                             overnight.Item().PaddingTop(5).Text(day.OvernightStopRecommendation)
                                 .FontSize(10)
                                 .FontColor(BrandDark);
@@ -419,7 +419,7 @@ public sealed class EnhancedPdfGenerator : IPdfGenerator
     private static string GetMonthName(int? month)
     {
         if (!month.HasValue) return "Mese sconosciuto";
-        
+
         return month.Value switch
         {
             1 => "Gennaio",
