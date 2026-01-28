@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     env:
-      VITE_API_BASE: https://wa-bt.azurewebsites.net/api
+      VITE_API_BASE: https://wa-bt-hgged7edc8gph9gz.italynorth-01.azurewebsites.net/api
     steps:
       - uses: actions/checkout@v4
         with:
