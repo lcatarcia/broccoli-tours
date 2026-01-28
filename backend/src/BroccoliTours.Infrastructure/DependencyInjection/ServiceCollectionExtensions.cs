@@ -13,7 +13,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ILocationCatalog, InMemoryLocationCatalog>();
         services.AddSingleton<StubItineraryEngine>();
         services.AddSingleton<IItineraryStore, InMemoryItineraryStore>();
-        services.AddSingleton<IPdfGenerator, SimplePdfGenerator>();
+        services.AddSingleton<IPdfGenerator, EnhancedPdfGenerator>();
         return services;
     }
 }
