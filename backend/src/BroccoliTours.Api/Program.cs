@@ -93,11 +93,9 @@ builder.Services.AddSingleton<IItineraryEngine>(sp =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Swagger enabled for all environments (including Production)
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseCors("default");
 
