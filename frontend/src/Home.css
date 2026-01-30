@@ -154,3 +154,73 @@
 .date-mode-toggle button:hover {
     border-color: #8b6f47;
 }
+/* Ownership toggle styles */
+.ownership-toggle {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.ownership-toggle button {
+    flex: 1;
+    padding: 0.6rem;
+    background: #1a1510;
+    color: #d4b896;
+    border: 1px solid #5a4a3a;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.ownership-toggle button.active {
+    background: linear-gradient(135deg, #8b6f47 0%, #a0826d 100%);
+    color: #fff;
+    border-color: #8b6f47;
+}
+
+.ownership-toggle button:hover {
+    border-color: #8b6f47;
+}
+
+/* Textarea styles */
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #5a4a3a;
+    border-radius: 6px;
+    font-size: 1rem;
+    background: #1a1510;
+    color: #e8d7c3;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: #8b6f47;
+    box-shadow: 0 0 0 3px rgba(139, 111, 71, 0.2);
+}
+
+/* Form hint styles */
+.form-hint {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: #a89a85;
+    font-style: italic;
+}
+
+/* Rental location dropdown styles */
+.rental-location-dropdown {
+    height: auto;
+    overflow-y: auto;
+}
+
+/* Drive hours selector styles */
+.drive-hours-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}

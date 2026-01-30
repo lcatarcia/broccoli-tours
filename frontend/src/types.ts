@@ -18,6 +18,16 @@ export interface Location {
     longitude: number;
 }
 
+export interface RentalLocation {
+    id: string;
+    name: string;
+    city: string;
+    country: string;
+    latitude: number;
+    longitude: number;
+    address: string;
+}
+
 export interface ItineraryStop {
     name: string;
     description: string;
@@ -58,4 +68,7 @@ export interface TravelPreferences {
     avoidOvertourism: boolean;
     minDailyDriveHours?: number;
     maxDailyDriveHours?: number;
+    isOwnedCamper: boolean;
+    ownedCamperModel?: string;
+    rentalLocationId?: string;
 }

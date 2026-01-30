@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCampers, getLocations, suggestItinerary } from './api';
-import type { Camper, Location } from './types';
+import { getCampers, getLocations, getRentalLocations, suggestItinerary } from './api';
+import type { Camper, Location, RentalLocation } from './types';
 import { useToast } from './useToast';
 import './Home.css';
 import './Modal.css';
@@ -31,9 +31,13 @@ export default function Home() {
     const { showToast } = useToast();
     const [campers, setCampers] = useState<Camper[]>([]);
     const [locations, setLocations] = useState<Location[]>([]);
+    const [rentalLocations, setRentalLocations] = useState<RentalLocation[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
+    const [ownershipType, setOwnershipType] = useState<'owned' | 'rental'>('owned');
+    const [ownedCamperModel, setOwnedCamperModel] = useState('');
+    const [selectedRentalLocation, setSelectedRentalLocation] = useState('');
     const [selectedCamper, setSelectedCamper] = useState('');
     const [selectedLocation, setSelectedLocation] = useState('');
     const [customDestination, setCustomDestination] = useState('');
@@ -50,10 +54,11 @@ export default function Home() {
     const [showErrorModal, setShowErrorModal] = useState(false);
 
     useEffect(() => {
-        Promise.all([getCampers(), getLocations()])
-            .then(([c, l]) => {
+        Promise.all([getCampers(), getLocations(), getRentalLocations()])
+            .then(([c, l, r]) => {
                 setCampers(c);
                 setLocations(l);
+                setRentalLocations(r);
             })
             .catch(() => setError('Errore caricamento dati'));
     }, []);
@@ -67,7 +72,7 @@ export default function Home() {
             const result = await suggestItinerary({
                 locationId: useCustomDestination ? undefined : selectedLocation,
                 locationQuery: useCustomDestination ? customDestination : undefined,
-                camperModelName: selectedCamper,
+                camperModelName: ownershipType === 'owned' ? ownedCamperModel : selectedCamper,
                 partySize,
                 startDate: dateMode === 'specific' ? (startDate || undefined) : undefined,
                 endDate: dateMode === 'specific' ? (endDate || undefined) : undefined,
@@ -76,6 +81,9 @@ export default function Home() {
                 avoidOvertourism,
                 minDailyDriveHours: minDriveHours,
                 maxDailyDriveHours: maxDriveHours,
+                isOwnedCamper: ownershipType === 'owned',
+                ownedCamperModel: ownershipType === 'owned' ? ownedCamperModel : undefined,
+                rentalLocationId: ownershipType === 'rental' ? selectedRentalLocation : undefined,
             });
 
             // Show toast for each JSON repair attempt
@@ -94,6 +102,9 @@ export default function Home() {
                 state: {
                     itinerary: result.itinerary,
                     preferences: {
+                        ownershipType,
+                        ownedCamperModel,
+                        selectedRentalLocation,
                         useCustomDestination,
                         selectedLocation,
                         customDestination,
@@ -169,15 +180,74 @@ export default function Home() {
                 </div>
 
                 <div className="form-group">
-                    <label>Camper</label>
-                    <select value={selectedCamper} onChange={e => setSelectedCamper(e.target.value)} required>
-                        <option value="">Seleziona un camper</option>
-                        {campers.map(c => (
-                            <option key={c.id} value={c.name}>
-                                {c.name} - {c.description}
-                            </option>
-                        ))}
-                    </select>
+                    <label>Tipo di mezzo</label>
+                    <div className="ownership-toggle">
+                        <button 
+                            type="button" 
+                            className={ownershipType === 'owned' ? 'active' : ''} 
+                            onClick={() => setOwnershipType('owned')}
+                        >
+                            Di proprietà
+                        </button>
+                        <button 
+                            type="button" 
+                            className={ownershipType === 'rental' ? 'active' : ''} 
+                            onClick={() => setOwnershipType('rental')}
+                        >
+                            Noleggiato
+                        </button>
+                    </div>
+                    
+                    {ownershipType === 'owned' ? (
+                        <div className="form-group">
+                            <label>Modello del tuo camper</label>
+                            <textarea
+                                value={ownedCamperModel}
+                                onChange={e => setOwnedCamperModel(e.target.value)}
+                                placeholder="Es: Fiat Ducato L2H2, Mercedes Sprinter 316 CDI, Volkswagen California Ocean..."
+                                rows={3}
+                                required
+                            />
+                            <small className="form-hint">
+                                Inserisci il modello del tuo camper. Queste informazioni ci aiuteranno a suggerirti luoghi adatti alle dimensioni del tuo mezzo.
+                            </small>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="form-group">
+                                <label>Sede di noleggio (RoadSurfer)</label>
+                                <select 
+                                    value={selectedRentalLocation} 
+                                    onChange={e => setSelectedRentalLocation(e.target.value)} 
+                                    required
+                                    className="rental-location-dropdown"
+                                    size={8}
+                                >
+                                    <option value="">Seleziona sede di noleggio</option>
+                                    {rentalLocations.map(loc => (
+                                        <option key={loc.id} value={loc.id}>
+                                            {loc.country} - {loc.city}
+                                        </option>
+                                    ))}
+                                </select>
+                                <small className="form-hint">
+                                    Il punto di partenza e ritorno coinciderà con la sede di noleggio selezionata.
+                                </small>
+                            </div>
+                            
+                            <div className="form-group">
+                                <label>Camper (catalogo RoadSurfer)</label>
+                                <select value={selectedCamper} onChange={e => setSelectedCamper(e.target.value)} required>
+                                    <option value="">Seleziona un camper</option>
+                                    {campers.map(c => (
+                                        <option key={c.id} value={c.name}>
+                                            {c.name} - {c.description}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 <div className="form-group">

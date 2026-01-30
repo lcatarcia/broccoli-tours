@@ -11,6 +11,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<ICamperCatalog, InMemoryCamperCatalog>();
         services.AddSingleton<ILocationCatalog, InMemoryLocationCatalog>();
+        services.AddSingleton<IRentalLocationCatalog, InMemoryRentalLocationCatalog>();
         services.AddSingleton<StubItineraryEngine>();
         services.AddSingleton<IItineraryStore, InMemoryItineraryStore>();
         services.AddSingleton<IPdfGenerator, EnhancedPdfGenerator>();

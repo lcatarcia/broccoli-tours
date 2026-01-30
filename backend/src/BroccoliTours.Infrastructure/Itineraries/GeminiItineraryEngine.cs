@@ -14,6 +14,7 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
 {
     private readonly HttpClient _http;
     private readonly ILocationCatalog _locations;
+    private readonly IRentalLocationCatalog _rentalLocations;
     private readonly string _apiKey;
     private readonly string _model;
 
@@ -21,10 +22,11 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
     private static readonly AsyncLocal<int> _jsonRepairAttempts = new AsyncLocal<int>();
     public static int CurrentJsonRepairAttempts => _jsonRepairAttempts.Value;
 
-    public GeminiItineraryEngine(HttpClient http, ILocationCatalog locations, string apiKey, string model = "gemini-1.5-flash")
+    public GeminiItineraryEngine(HttpClient http, ILocationCatalog locations, IRentalLocationCatalog rentalLocations, string apiKey, string model = "gemini-1.5-flash")
     {
         _http = http;
         _locations = locations;
+        _rentalLocations = rentalLocations;
         _apiKey = apiKey;
         _model = model;
 
@@ -177,6 +179,40 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
         var destinationRegion = location?.Region ?? string.Empty;
         var destinationCoords = location != null ? $"{location.Latitude},{location.Longitude}" : "coordinate da determinare";
 
+        // Rental location info
+        string rentalInfo = "";
+        if (!preferences.IsOwnedCamper && !string.IsNullOrWhiteSpace(preferences.RentalLocationId))
+        {
+            var rentalLoc = _rentalLocations.FindById(preferences.RentalLocationId);
+            if (rentalLoc != null)
+            {
+                rentalInfo = $"""
+        
+        PUNTO PARTENZA E RITORNO OBBLIGATORIO:
+        Il camper è noleggiato presso RoadSurfer - {rentalLoc.City}, {rentalLoc.Country}
+        Coordinate sede: {rentalLoc.Latitude},{rentalLoc.Longitude}
+        Indirizzo: {rentalLoc.Address}
+        
+        VINCOLO CRITICO: L'itinerario DEVE iniziare e terminare esattamente in questa sede.
+        - Giorno 1: partenza da {rentalLoc.City} ({rentalLoc.Country})
+        - Ultimo giorno: ritorno a {rentalLoc.City} ({rentalLoc.Country})
+        - Considera tempi di ritiro/riconsegna camper (1-2 ore il primo e ultimo giorno)
+        """;
+            }
+        }
+        else if (preferences.IsOwnedCamper && !string.IsNullOrWhiteSpace(preferences.OwnedCamperModel))
+        {
+            rentalInfo = $"""
+        
+        MEZZO DI PROPRIETÀ:
+        Il cliente viaggerà con il proprio camper: {preferences.OwnedCamperModel}
+        Considera dimensioni e ingombro del mezzo specificato per:
+        - Accessibilità ai luoghi (centri storici, strade strette, parcheggi)
+        - Aree sosta e campeggi adeguati alle dimensioni
+        - Percorsi stradali adatti al tipo di mezzo
+        """;
+        }
+
         var schema = """
 {
     "id": "string",
@@ -230,7 +266,7 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
         - Weekend trip: {weekend}
         - Evita overtourism: {avoid}
         - Numero persone: {preferences.PartySize}
-        - Camper: categoria {camper}, modello {preferences.CamperModelName ?? "non specificato"}
+        - Camper: categoria {camper}, modello {preferences.CamperModelName ?? "non specificato"}{rentalInfo}
 
         Regole di qualità (fondamentali):
         - {drivingRule}

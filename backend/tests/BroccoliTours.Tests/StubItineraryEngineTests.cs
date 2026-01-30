@@ -36,7 +36,10 @@ public class StubItineraryEngineTests
             WeekendTrip: false,
             AvoidOvertourism: true,
             MinDailyDriveHours: 2,
-            MaxDailyDriveHours: 4
+            MaxDailyDriveHours: 4,
+            IsOwnedCamper: true,
+            OwnedCamperModel: "Test Camper",
+            RentalLocationId: null
         );
 
         // Act
@@ -69,7 +72,10 @@ public class StubItineraryEngineTests
             WeekendTrip: false,
             AvoidOvertourism: true,
             MinDailyDriveHours: 2,
-            MaxDailyDriveHours: 4
+            MaxDailyDriveHours: 4,
+            IsOwnedCamper: true,
+            OwnedCamperModel: "Test Camper",
+            RentalLocationId: null
         );
 
         // Act
@@ -104,7 +110,10 @@ public class StubItineraryEngineTests
             WeekendTrip: false,
             AvoidOvertourism: true,
             MinDailyDriveHours: 2,
-            MaxDailyDriveHours: 4
+            MaxDailyDriveHours: 4,
+            IsOwnedCamper: true,
+            OwnedCamperModel: "Test Camper",
+            RentalLocationId: null
         );
 
         // Act
@@ -139,7 +148,10 @@ public class StubItineraryEngineTests
             WeekendTrip: false,
             AvoidOvertourism: true,
             MinDailyDriveHours: 2,
-            MaxDailyDriveHours: 4
+            MaxDailyDriveHours: 4,
+            IsOwnedCamper: true,
+            OwnedCamperModel: "Test Camper",
+            RentalLocationId: null
         );
 
         // Act

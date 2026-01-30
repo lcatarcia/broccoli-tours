@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import L from 'leaflet';
-import type { Itinerary as ItineraryType, Camper, Location } from './types';
-import { getPdfUrl, suggestItinerary, getCampers, getLocations } from './api';
+import type { Itinerary as ItineraryType, Camper, Location, RentalLocation } from './types';
+import { getPdfUrl, suggestItinerary, getCampers, getLocations, getRentalLocations } from './api';
 import 'leaflet/dist/leaflet.css';
 import './Itinerary.css';
 import './Home.css';
@@ -45,11 +45,15 @@ export default function Itinerary() {
 
     const [campers, setCampers] = useState<Camper[]>([]);
     const [locations, setLocations] = useState<Location[]>([]);
+    const [rentalLocations, setRentalLocations] = useState<RentalLocation[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showErrorModal, setShowErrorModal] = useState(false);
     const [showForm, setShowForm] = useState(false);
 
+    const [ownershipType, setOwnershipType] = useState<'owned' | 'rental'>(savedPrefs?.ownershipType || 'owned');
+    const [ownedCamperModel, setOwnedCamperModel] = useState(savedPrefs?.ownedCamperModel || '');
+    const [selectedRentalLocation, setSelectedRentalLocation] = useState(savedPrefs?.selectedRentalLocation || '');
     const [selectedCamper, setSelectedCamper] = useState(savedPrefs?.selectedCamper || '');
     const [selectedLocation, setSelectedLocation] = useState(savedPrefs?.selectedLocation || '');
     const [customDestination, setCustomDestination] = useState(savedPrefs?.customDestination || '');
@@ -73,7 +77,7 @@ export default function Itinerary() {
             const result = await suggestItinerary({
                 locationId: useCustomDestination ? undefined : selectedLocation,
                 locationQuery: useCustomDestination ? customDestination : undefined,
-                camperModelName: selectedCamper,
+                camperModelName: ownershipType === 'owned' ? ownedCamperModel : selectedCamper,
                 partySize,
                 startDate: dateMode === 'specific' ? (startDate || undefined) : undefined,
                 endDate: dateMode === 'specific' ? (endDate || undefined) : undefined,
@@ -82,6 +86,9 @@ export default function Itinerary() {
                 avoidOvertourism,
                 minDailyDriveHours: minDriveHours,
                 maxDailyDriveHours: maxDriveHours,
+                isOwnedCamper: ownershipType === 'owned',
+                ownedCamperModel: ownershipType === 'owned' ? ownedCamperModel : undefined,
+                rentalLocationId: ownershipType === 'rental' ? selectedRentalLocation : undefined,
             });
             setCurrentItinerary(result.itinerary);
             setShowForm(false);
@@ -100,9 +107,10 @@ export default function Itinerary() {
 
     const loadFormData = async () => {
         if (campers.length === 0) {
-            const [c, l] = await Promise.all([getCampers(), getLocations()]);
+            const [c, l, r] = await Promise.all([getCampers(), getLocations(), getRentalLocations()]);
             setCampers(c);
             setLocations(l);
+            setRentalLocations(r);
         }
         setShowForm(!showForm);
     };
@@ -179,15 +187,74 @@ export default function Itinerary() {
                     </div>
 
                     <div className="form-group">
-                        <label>Camper</label>
-                        <select value={selectedCamper} onChange={e => setSelectedCamper(e.target.value)} required>
-                            <option value="">Seleziona un camper</option>
-                            {campers.map(c => (
-                                <option key={c.id} value={c.name}>
-                                    {c.name} - {c.description}
-                                </option>
-                            ))}
-                        </select>
+                        <label>Tipo di mezzo</label>
+                        <div className="ownership-toggle">
+                            <button 
+                                type="button" 
+                                className={ownershipType === 'owned' ? 'active' : ''} 
+                                onClick={() => setOwnershipType('owned')}
+                            >
+                                Di proprietà
+                            </button>
+                            <button 
+                                type="button" 
+                                className={ownershipType === 'rental' ? 'active' : ''} 
+                                onClick={() => setOwnershipType('rental')}
+                            >
+                                Noleggiato
+                            </button>
+                        </div>
+                        
+                        {ownershipType === 'owned' ? (
+                            <div className="form-group">
+                                <label>Modello del tuo camper</label>
+                                <textarea
+                                    value={ownedCamperModel}
+                                    onChange={e => setOwnedCamperModel(e.target.value)}
+                                    placeholder="Es: Fiat Ducato L2H2, Mercedes Sprinter 316 CDI, Volkswagen California Ocean..."
+                                    rows={3}
+                                    required
+                                />
+                                <small className="form-hint">
+                                    Inserisci il modello del tuo camper. Queste informazioni ci aiuteranno a suggerirti luoghi adatti alle dimensioni del tuo mezzo.
+                                </small>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="form-group">
+                                    <label>Sede di noleggio (RoadSurfer)</label>
+                                    <select 
+                                        value={selectedRentalLocation} 
+                                        onChange={e => setSelectedRentalLocation(e.target.value)} 
+                                        required
+                                        className="rental-location-dropdown"
+                                        size={8}
+                                    >
+                                        <option value="">Seleziona sede di noleggio</option>
+                                        {rentalLocations.map(loc => (
+                                            <option key={loc.id} value={loc.id}>
+                                                {loc.country} - {loc.city}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <small className="form-hint">
+                                        Il punto di partenza e ritorno coinciderà con la sede di noleggio selezionata.
+                                    </small>
+                                </div>
+                                
+                                <div className="form-group">
+                                    <label>Camper (catalogo RoadSurfer)</label>
+                                    <select value={selectedCamper} onChange={e => setSelectedCamper(e.target.value)} required>
+                                        <option value="">Seleziona un camper</option>
+                                        {campers.map(c => (
+                                            <option key={c.id} value={c.name}>
+                                                {c.name} - {c.description}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     <div className="form-group">

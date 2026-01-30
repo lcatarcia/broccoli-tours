@@ -59,6 +59,7 @@ builder.Services.AddSingleton<IItineraryEngine>(sp =>
     var configuration = sp.GetRequiredService<IConfiguration>();
     var httpFactory = sp.GetRequiredService<IHttpClientFactory>();
     var locations = sp.GetRequiredService<ILocationCatalog>();
+    var rentalLocations = sp.GetRequiredService<IRentalLocationCatalog>();
     var stub = sp.GetRequiredService<StubItineraryEngine>();
 
     // OpenAI configuration
@@ -83,7 +84,7 @@ builder.Services.AddSingleton<IItineraryEngine>(sp =>
     if (!string.IsNullOrWhiteSpace(geminiKey))
     {
         var http = httpFactory.CreateClient("gemini");
-        var geminiEngine = new GeminiItineraryEngine(http, locations, geminiKey, geminiModel);
+        var geminiEngine = new GeminiItineraryEngine(http, locations, rentalLocations, geminiKey, geminiModel);
         return new ResilientItineraryEngine(geminiEngine, null, stub);
     }
 
@@ -117,6 +118,12 @@ app.MapGet("/api/locations", (ILocationCatalog catalog) => Results.Ok(catalog.Ge
     .WithDescription("Ottiene l'elenco delle destinazioni disponibili per viaggi in camper (Italia, Francia, etc.)")
     .WithTags("Locations")
     .Produces<List<Location>>(200);
+
+app.MapGet("/api/rentallocations", (IRentalLocationCatalog catalog) => Results.Ok(catalog.GetAll()))
+    .WithName("GetRentalLocations")
+    .WithDescription("Ottiene l'elenco delle sedi RoadSurfer per il noleggio camper in Europa")
+    .WithTags("RentalLocations")
+    .Produces<List<RentalLocation>>(200);
 
 app.MapPost("/api/itineraries/suggest", async (
     TravelPreferences preferences,

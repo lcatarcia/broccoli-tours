@@ -18,5 +18,8 @@ public sealed record TravelPreferences(
     bool WeekendTrip,
     bool AvoidOvertourism,
     double? MinDailyDriveHours,
-    double? MaxDailyDriveHours
+    double? MaxDailyDriveHours,
+    bool IsOwnedCamper,
+    string? OwnedCamperModel,
+    string? RentalLocationId
 );

@@ -1,4 +1,4 @@
-import type { Camper, Location, Itinerary, TravelPreferences } from './types';
+import type { Camper, Location, RentalLocation, Itinerary, TravelPreferences } from './types';
 
 const defaultApiBase = import.meta.env.DEV
     ? 'http://localhost:5080/api'
@@ -31,6 +31,12 @@ export async function getCampers(): Promise<Camper[]> {
 export async function getLocations(): Promise<Location[]> {
     const response = await fetch(`${API_BASE}/locations`);
     if (!response.ok) throw new Error('Failed to fetch locations');
+    return response.json();
+}
+
+export async function getRentalLocations(): Promise<RentalLocation[]> {
+    const response = await fetch(`${API_BASE}/rentallocations`);
+    if (!response.ok) throw new Error('Failed to fetch rental locations');
     return response.json();
 }
 
