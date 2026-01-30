@@ -62,7 +62,7 @@ public sealed class InMemoryRentalLocationCatalog : IRentalLocationCatalog
         new("no-oslo", "Oslo", "Oslo", "Norvegia", 59.9139, 10.7522, "RoadSurfer Station Oslo"),
     };
 
-    public IReadOnlyList<RentalLocation> GetAll() => 
+    public IReadOnlyList<RentalLocation> GetAll() =>
         RentalLocations.OrderBy(l => l.Country).ThenBy(l => l.City).ToList();
 
     public RentalLocation? FindById(string id) => RentalLocations.FirstOrDefault(l => l.Id.Equals(id, StringComparison.OrdinalIgnoreCase));

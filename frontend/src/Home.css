@@ -154,6 +154,7 @@
 .date-mode-toggle button:hover {
     border-color: #8b6f47;
 }
+
 /* Ownership toggle styles */
 .ownership-toggle {
     display: flex;

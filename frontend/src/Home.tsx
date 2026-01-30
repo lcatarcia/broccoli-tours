@@ -182,22 +182,22 @@ export default function Home() {
                 <div className="form-group">
                     <label>Tipo di mezzo</label>
                     <div className="ownership-toggle">
-                        <button 
-                            type="button" 
-                            className={ownershipType === 'owned' ? 'active' : ''} 
+                        <button
+                            type="button"
+                            className={ownershipType === 'owned' ? 'active' : ''}
                             onClick={() => setOwnershipType('owned')}
                         >
                             Di proprietà
                         </button>
-                        <button 
-                            type="button" 
-                            className={ownershipType === 'rental' ? 'active' : ''} 
+                        <button
+                            type="button"
+                            className={ownershipType === 'rental' ? 'active' : ''}
                             onClick={() => setOwnershipType('rental')}
                         >
                             Noleggiato
                         </button>
                     </div>
-                    
+
                     {ownershipType === 'owned' ? (
                         <div className="form-group">
                             <label>Modello del tuo camper</label>
@@ -216,9 +216,9 @@ export default function Home() {
                         <>
                             <div className="form-group">
                                 <label>Sede di noleggio (RoadSurfer)</label>
-                                <select 
-                                    value={selectedRentalLocation} 
-                                    onChange={e => setSelectedRentalLocation(e.target.value)} 
+                                <select
+                                    value={selectedRentalLocation}
+                                    onChange={e => setSelectedRentalLocation(e.target.value)}
                                     required
                                     className="rental-location-dropdown"
                                     size={8}
@@ -234,7 +234,7 @@ export default function Home() {
                                     Il punto di partenza e ritorno coinciderà con la sede di noleggio selezionata.
                                 </small>
                             </div>
-                            
+
                             <div className="form-group">
                                 <label>Camper (catalogo RoadSurfer)</label>
                                 <select value={selectedCamper} onChange={e => setSelectedCamper(e.target.value)} required>
