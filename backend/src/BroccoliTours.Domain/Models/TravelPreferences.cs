@@ -16,7 +16,7 @@ public sealed record TravelPreferences(
     int PartySize,
     int? TripDurationDays,
     bool WeekendTrip,
-    bool AvoidOvertourism,
+    int OvertourismLevel,
     double? MinDailyDriveHours,
     double? MaxDailyDriveHours,
     bool IsOwnedCamper,

@@ -65,7 +65,7 @@ export interface TravelPreferences {
     endDate?: string;
     suggestedMonth?: string;
     tripDurationDays?: number;
-    avoidOvertourism: boolean;
+    overtourismLevel: number;
     minDailyDriveHours?: number;
     maxDailyDriveHours?: number;
     isOwnedCamper: boolean;

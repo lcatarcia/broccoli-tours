@@ -135,7 +135,7 @@ public sealed class OpenAIItineraryEngine : IItineraryEngine
             : "any camper";
 
         var weekend = preferences.WeekendTrip ? "yes" : "no";
-        var avoid = preferences.AvoidOvertourism ? "yes" : "no";
+        var overtourismLevel = preferences.OvertourismLevel;
         var duration = preferences.TripDurationDays.HasValue
             ? $"{preferences.TripDurationDays.Value} giorni totali di viaggio richiesti"
             : "durata flessibile";
@@ -182,9 +182,15 @@ public sealed class OpenAIItineraryEngine : IItineraryEngine
             ? "Il mezzo è grande: evita centri storici stretti, passi molto ripidi e strade bianche; preferisci parcheggi ampi e accessi comodi."
             : "Il mezzo è compatto: puoi includere strade panoramiche più strette, ma sempre con prudenza e alternative.";
 
-        var overtourismRule = preferences.AvoidOvertourism
-            ? "Anti-overtourism: proponi alternative meno affollate entro 15–30 minuti dalle mete note, e suggerisci fasce orarie intelligenti (mattina presto / tardo pomeriggio)."
-            : "Seleziona comunque soste sostenibili e consigli pratici per evitare congestione.";
+        var overtourismRule = preferences.OvertourismLevel switch
+        {
+            1 => "Livello 1 (Turistico): Proponi principalmente mete note e turistiche. Includi le attrazioni principali e iconiche della destinazione.",
+            2 => "Livello 2 (Turistico con spunti): Proponi principalmente mete turistiche note, ma aggiungi qualche spunto meno battuto nelle vicinanze.",
+            3 => "Livello 3 (Bilanciato): Equilibra sapientemente mete turistiche principali con gemme nascoste. Mix 50/50 tra luoghi noti e alternative meno affollate.",
+            4 => "Livello 4 (Alternativo): Privilegia luoghi meno conosciuti, includendo solo poche mete turistiche principali se davvero imperdibili. Focus su autenticità ed esperienze uniche.",
+            5 => "Livello 5 (Completamente Alternativo): Proponi SOLO mete poco conosciute e fuori dai circuiti turistici. Evita completamente le destinazioni affollate. Cerca borghi nascosti, paesaggi incontaminati, esperienze autentiche.",
+            _ => "Livello 3 (Bilanciato): Equilibra mete turistiche con gemme nascoste."
+        };
 
         return $"""
         Progetta un itinerario in stile TOUR OPERATOR per Broccoli Tours.
@@ -194,7 +200,7 @@ public sealed class OpenAIItineraryEngine : IItineraryEngine
         - Periodo: {period}
         - Durata desiderata: {duration}
         - Weekend trip: {weekend}
-        - Evita overtourism: {avoid}
+        - Livello anti-overtourism: {overtourismLevel}/5
         - Numero persone: {preferences.PartySize}
         - Camper: categoria {camper}, modello {preferences.CamperModelName ?? "non specificato"}
 

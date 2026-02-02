@@ -92,8 +92,10 @@ public sealed class StubItineraryEngine : IItineraryEngine
         if (preferences.WeekendTrip)
             baseTips.Insert(0, "Modalità weekend: poche ore di guida e soste semplici.");
 
-        if (preferences.AvoidOvertourism)
-            baseTips.Add("Broccoli Tip: scegli attrazioni secondarie a 15–30 min dalle mete più note.");
+        if (preferences.OvertourismLevel >= 4)
+            baseTips.Add("Broccoli Tip: itinerario alternativo con mete meno conosciute e autentiche.");
+        else if (preferences.OvertourismLevel >= 2)
+            baseTips.Add("Broccoli Tip: mix equilibrato tra attrazioni note e gemme nascoste.");
 
         var requestedDays = preferences.TripDurationDays.HasValue && preferences.TripDurationDays.Value > 0
             ? preferences.TripDurationDays.Value

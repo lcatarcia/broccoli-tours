@@ -64,7 +64,7 @@ export default function Itinerary() {
     const [endDate, setEndDate] = useState(savedPrefs?.endDate || '');
     const [selectedMonth, setSelectedMonth] = useState(savedPrefs?.selectedMonth || '');
     const [monthTripLength, setMonthTripLength] = useState(savedPrefs?.monthTripLength || 7);
-    const [avoidOvertourism, setAvoidOvertourism] = useState(savedPrefs?.avoidOvertourism ?? true);
+    const [overtourismLevel, setOvertourismLevel] = useState(savedPrefs?.overtourismLevel || 3);
     const [minDriveHours, setMinDriveHours] = useState(savedPrefs?.minDriveHours || 2);
     const [maxDriveHours, setMaxDriveHours] = useState(savedPrefs?.maxDriveHours || 4);
 
@@ -83,7 +83,7 @@ export default function Itinerary() {
                 endDate: dateMode === 'specific' ? (endDate || undefined) : undefined,
                 suggestedMonth: dateMode === 'month' ? selectedMonth : undefined,
                 tripDurationDays: dateMode === 'month' ? monthTripLength : undefined,
-                avoidOvertourism,
+                overtourismLevel,
                 minDailyDriveHours: minDriveHours,
                 maxDailyDriveHours: maxDriveHours,
                 isOwnedCamper: ownershipType === 'owned',
@@ -357,11 +357,31 @@ export default function Itinerary() {
                         </div>
                     </div>
 
-                    <div className="form-group checkbox">
+                    <div className="form-group">
                         <label>
-                            <input type="checkbox" checked={avoidOvertourism} onChange={e => setAvoidOvertourism(e.target.checked)} />
-                            Evita mete sovraffollate (anti-overtourism)
+                            Livello anti-overtourism: {overtourismLevel}/5
+                            {overtourismLevel === 1 && <span className="level-hint"> (Solo mete turistiche note)</span>}
+                            {overtourismLevel === 2 && <span className="level-hint"> (Prevalentemente turistiche)</span>}
+                            {overtourismLevel === 3 && <span className="level-hint"> (Bilanciato: mix tra turistiche e nascoste)</span>}
+                            {overtourismLevel === 4 && <span className="level-hint"> (Prevalentemente alternative)</span>}
+                            {overtourismLevel === 5 && <span className="level-hint"> (Solo gemme nascoste)</span>}
                         </label>
+                        <input
+                            type="range"
+                            min="1"
+                            max="5"
+                            step="1"
+                            value={overtourismLevel}
+                            onChange={e => setOvertourismLevel(parseInt(e.target.value))}
+                            className="overtourism-slider"
+                        />
+                        <div className="slider-labels">
+                            <span>1<br/><small>Turistico</small></span>
+                            <span>2</span>
+                            <span>3<br/><small>Bilanciato</small></span>
+                            <span>4</span>
+                            <span>5<br/><small>Alternativo</small></span>
+                        </div>
                     </div>
 
                     {error && <div className="error">{error}</div>}
