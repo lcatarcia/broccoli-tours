@@ -376,11 +376,11 @@ export default function Itinerary() {
                             className="overtourism-slider"
                         />
                         <div className="slider-labels">
-                            <span>1<br/><small>Turistico</small></span>
+                            <span>1<br /><small>Turistico</small></span>
                             <span>2</span>
-                            <span>3<br/><small>Bilanciato</small></span>
+                            <span>3<br /><small>Bilanciato</small></span>
                             <span>4</span>
-                            <span>5<br/><small>Alternativo</small></span>
+                            <span>5<br /><small>Alternativo</small></span>
                         </div>
                     </div>
 
