@@ -426,7 +426,7 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
                     var parkingInfo = stopEl.TryGetProperty("parkingInfo", out var pi) && pi.ValueKind == JsonValueKind.String
                         ? pi.GetString()
                         : null;
-                    
+
                     stops.Add(new ItineraryStop(
                         stopEl.GetProperty("name").GetString() ?? "",
                         stopEl.GetProperty("description").GetString(),
