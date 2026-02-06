@@ -7,5 +7,6 @@ public sealed record ItineraryDay(
     IReadOnlyList<ItineraryStop> Stops,
     IReadOnlyList<string> Activities,
     double? DriveHoursEstimate,
-    string? OvernightStopRecommendation
+    string? OvernightStopRecommendation,
+    string? CamperAreaInfo = null
 );

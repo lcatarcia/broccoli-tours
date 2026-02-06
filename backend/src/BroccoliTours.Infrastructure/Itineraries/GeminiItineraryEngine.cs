@@ -231,11 +231,12 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
             "date": "YYYY-MM-DD or null",
             "title": "string",
             "stops": [
-                { "name": "string", "description": "string or null", "latitude": 0.0, "longitude": 0.0, "type": "viewpoint|village|camper_area|attraction|food" }
+                { "name": "string", "description": "string or null", "latitude": 0.0, "longitude": 0.0, "type": "viewpoint|village|camper_area|attraction|food", "parkingInfo": "string or null" }
             ],
             "activities": ["string"],
             "driveHoursEstimate": 0.0,
-            "overnightStopRecommendation": "string or null"
+            "overnightStopRecommendation": "string or null",
+            "camperAreaInfo": "string or null"
         }
     ],
     "tips": ["string"],
@@ -251,6 +252,12 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
         var rigRule = isBigRig
             ? "Il mezzo è grande: evita centri storici stretti, passi molto ripidi e strade bianche; preferisci parcheggi ampi e accessi comodi."
             : "Il mezzo è compatto: puoi includere strade panoramiche più strette, ma sempre con prudenza e alternative.";
+
+        var parkingRule = isBigRig
+            ? "PARCHEGGI E AREE SOSTA (MEZZO GRANDE): Per ogni stop, specifica nel campo 'parkingInfo' informazioni pratiche su dove parcheggiare (es. 'Parcheggio Pineta - ampio, adatto mezzi >7m, €5/giorno' o 'Area sosta comunale - gratuita, 10 piazzole camper'). Per aree urbane, indica alternative sicure fuori dal centro. Per camper_area, fornisci dettagli su servizi (carico/scarico, elettricità), dimensioni max accettate, costi."
+            : "PARCHEGGI E AREE SOSTA (MEZZO COMPATTO): Per ogni stop, specifica nel campo 'parkingInfo' dove parcheggiare (es. 'Parcheggio centro - €2/h, accessibile van' o 'Piazzale panoramico - gratuito'). Per camper_area, indica servizi disponibili e costi indicativi.";
+
+        var camperAreaRule = "CAMPO camperAreaInfo: Per ogni giornata, nel campo 'camperAreaInfo' fornisci un riepilogo delle migliori aree sosta/campeggi della zona con: nome, servizi principali (elettricità, carico/scarico, docce), dimensioni max, costo orientativo, e indicazioni su accessibilità per il tipo di camper selezionato.";
 
         var overtourismRule = preferences.OvertourismLevel switch
         {
@@ -277,13 +284,17 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
         Regole di qualità (fondamentali):
         - {drivingRule}
         - {rigRule}
-        - Inserisci SEMPRE almeno 1 stop di tipo "camper_area" per ogni giorno (area sosta/camping pratico), con descrizione utile.
+        - {parkingRule}
+        - {camperAreaRule}
+        - Inserisci SEMPRE almeno 1 stop di tipo "camper_area" per ogni giorno (area sosta/camping pratico), con descrizione utile e parkingInfo dettagliato.
         - Inserisci almeno 1 gemma "fuori rotta" (villaggio/punto panoramico) e almeno 1 stop "food" (mercato/trattoria/azienda locale) nell'intero itinerario.
         - {overtourismRule}
         - Coord: ogni stop deve avere latitude/longitude realistici (non 0,0).
         - DayNumber sequenziale (1..N). Se date non disponibili, usa null.
         - driveHoursEstimate: stima ore guida totali quel giorno (es. 2.5, 3.0 per viaggio normale; 1.5 per weekend). Se 0 ore (giorno stazionario), usa 0.0.
         - overnightStopRecommendation: nome area sosta/camping consigliata per la notte (può omettere se è l'ultimo giorno).
+        - parkingInfo: per OGNI stop (non solo camper_area), fornisci informazioni pratiche su dove parcheggiare il camper, considerando le sue dimensioni.
+        - camperAreaInfo: per OGNI giorno, fornisci un riepilogo delle aree sosta/campeggi disponibili nella zona.
 
         Stile Broccoli Tours:
         - Italiano, tono competente e rassicurante, concreto.
@@ -412,12 +423,17 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
                 var stops = new List<ItineraryStop>();
                 foreach (var stopEl in dayEl.GetProperty("stops").EnumerateArray())
                 {
+                    var parkingInfo = stopEl.TryGetProperty("parkingInfo", out var pi) && pi.ValueKind == JsonValueKind.String
+                        ? pi.GetString()
+                        : null;
+                    
                     stops.Add(new ItineraryStop(
                         stopEl.GetProperty("name").GetString() ?? "",
                         stopEl.GetProperty("description").GetString(),
                         stopEl.GetProperty("latitude").GetDouble(),
                         stopEl.GetProperty("longitude").GetDouble(),
-                        stopEl.GetProperty("type").GetString() ?? "attraction"
+                        stopEl.GetProperty("type").GetString() ?? "attraction",
+                        parkingInfo
                     ));
                 }
 
@@ -433,7 +449,11 @@ public sealed class GeminiItineraryEngine : IItineraryEngine
                     ? os.GetString()
                     : null;
 
-                days.Add(new ItineraryDay(dayNumber, dayDate, dayTitle, stops, activities, driveHours, overnight));
+                var camperAreaInfo = dayEl.TryGetProperty("camperAreaInfo", out var cai) && cai.ValueKind == JsonValueKind.String
+                    ? cai.GetString()
+                    : null;
+
+                days.Add(new ItineraryDay(dayNumber, dayDate, dayTitle, stops, activities, driveHours, overnight, camperAreaInfo));
             }
 
             var tips = root.GetProperty("tips").EnumerateArray()

@@ -5,5 +5,6 @@ public sealed record ItineraryStop(
     string? Description,
     double Latitude,
     double Longitude,
-    string Type
+    string Type,
+    string? ParkingInfo = null
 );
